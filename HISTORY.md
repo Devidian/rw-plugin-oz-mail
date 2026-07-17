@@ -1,5 +1,9 @@
 # History
 
+## [0.1.2] - 2026-07-17 | Shared runtime dependency repair
+
+- fix: require OZTools 0.22.2 for exact persisted-player lookup
+
 ## [0.1.1] - 2026-07-17 | Release packaging repair
 
 - fix: install the bundled PluginAPI in CI before resolving dependencies
