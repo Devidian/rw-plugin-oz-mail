@@ -1,5 +1,9 @@
 # History
 
+## [0.1.3] - 2026-07-17 | Release package validation
+
+- fix: validate the distributable ZIP in CI using the Maven package lifecycle
+
 ## [0.1.2] - 2026-07-17 | Shared runtime dependency repair
 
 - fix: require OZTools 0.22.2 for exact persisted-player lookup
