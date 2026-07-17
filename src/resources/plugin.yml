@@ -1,10 +1,9 @@
 name: "OZ - Mail"
 main: de.omegazirkel.risingworld.OZMail
-version: 0.1.0
+version: 0.1.1
 author: "Maik 'Devidian' Laschober"
 team: "Omega Zirkel"
 description: "In-game mail with recoverable attachments"
 license: N/A
 website: N/A
 loadorder: -40
-

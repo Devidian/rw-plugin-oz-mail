@@ -1,5 +1,9 @@
 # History
 
+## [0.1.1] - 2026-07-17 | Release packaging repair
+
+- fix: install the bundled PluginAPI in CI before resolving dependencies
+
 ## [0.1.0] - 2026-07-16 | Initial secure mail release
 
 - Added durable mail journal, recovery quarantine, mailbox UI, attachment custody send/claim/return/expiry flows, settings, operational administration and localized UI.
