@@ -26,6 +26,7 @@ public final class MailSettings {
     public int maxPlayerAttachments;
     public int sendCooldownSeconds;
     public int attachmentExpiryDays;
+    public int recentPlayerDays;
     public boolean enableAnnouncements;
     public boolean enableCod;
     public boolean enableWelcomeMessage;
@@ -52,6 +53,7 @@ public final class MailSettings {
         maxPlayerAttachments = integer(values, defaults, "maxPlayerAttachments", 5, 0, 100);
         sendCooldownSeconds = integer(values, defaults, "sendCooldownSeconds", 30, 0, 86400);
         attachmentExpiryDays = integer(values, defaults, "attachmentExpiryDays", 30, 1, 3650);
+        recentPlayerDays = integer(values, defaults, "recentPlayerDays", 30, 1, 3650);
         enableAnnouncements = bool(values, defaults, "enableAnnouncements", true);
         enableCod = bool(values, defaults, "enableCod", false);
         enableWelcomeMessage = bool(values, defaults, "enableWelcomeMessage", false);
@@ -96,6 +98,8 @@ public final class MailSettings {
                         "Sekunden zwischen Spieler-Mails. / Seconds between player mails.", AdminSettingsType.INTEGER),
                 entry("attachmentExpiryDays", "Anhang-Ablauf / Attachment expiry",
                         "Tage bis zur Rueckgabe abgelaufener Anhaenge. / Days before expired attachments are returned.", AdminSettingsType.INTEGER),
+                entry("recentPlayerDays", "Spielerliste Zeitraum / Player list window",
+                        "Standardwert fuer die persoenliche Empfaengerliste in Tagen. / Default for each player's recipient-list period in days.", AdminSettingsType.INTEGER),
                 entry("enableAnnouncements", "Ankuendigungen / Announcements",
                         "Globale Zustellhinweise erlauben. / Allow global delivery notifications.", AdminSettingsType.BOOLEAN),
                 entry("enableCod", "Nachnahme / Cash on delivery",

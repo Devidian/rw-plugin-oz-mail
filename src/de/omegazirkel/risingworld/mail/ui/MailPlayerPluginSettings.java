@@ -2,9 +2,13 @@ package de.omegazirkel.risingworld.mail.ui;
 
 import de.omegazirkel.risingworld.OZMail;
 import de.omegazirkel.risingworld.tools.ui.BasePlayerPluginSettingsPanel;
+import de.omegazirkel.risingworld.tools.ui.ButtonFactory;
+import de.omegazirkel.risingworld.tools.ui.InfoButton;
 import de.omegazirkel.risingworld.tools.ui.OZUIElement;
 import de.omegazirkel.risingworld.tools.ui.PlayerPluginSettings;
 import net.risingworld.api.objects.Player;
+import net.risingworld.api.ui.UITextField;
+import net.risingworld.api.ui.style.Pivot;
 
 public final class MailPlayerPluginSettings extends PlayerPluginSettings {
     private final OZMail plugin;
@@ -27,6 +31,37 @@ public final class MailPlayerPluginSettings extends PlayerPluginSettings {
                     redrawContent();
                 }));
                 flexWrapper.addChild(announcements);
+                flexWrapper.addChild(recipientWindowSetting(player));
+            }
+
+            private OZUIElement recipientWindowSetting(Player player) {
+                OZUIElement setting = defaultSettingsContainer();
+                setting.addChild(defaultSettingsLabel(plugin.text("MAIL_SETTINGS_RECIPIENT_WINDOW", player)
+                        .replace("PH_DAYS", String.valueOf(plugin.recipientWindowDays(player)))));
+
+                UITextField days = new UITextField(String.valueOf(plugin.recipientWindowDays(player)));
+                days.setPivot(Pivot.UpperLeft);
+                days.setPosition(10, 58, false);
+                days.setSize(145, 28, false);
+                days.setMaxCharacters(4);
+                setting.addChild(days);
+
+                InfoButton save = ButtonFactory.info(plugin.text("MAIL_SETTINGS_SAVE", player), event ->
+                        days.getCurrentText(player, value -> {
+                            try {
+                                if (value != null) {
+                                    MailPlayerPreferences.setRecipientWindowDays(player, Integer.parseInt(value.trim()));
+                                }
+                            } catch (NumberFormatException ignored) {
+                                // Keep the existing value when the player entered no valid day count.
+                            }
+                            redrawContent();
+                        }));
+                save.setPivot(Pivot.UpperLeft);
+                save.setPosition(163, 58, false);
+                save.setSize(95, 28, false);
+                setting.addChild(save);
+                return setting;
             }
         };
     }

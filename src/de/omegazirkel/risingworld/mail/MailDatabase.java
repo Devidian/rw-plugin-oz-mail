@@ -16,7 +16,7 @@ import java.util.Optional;
  * while a SQLite transaction is open; their intent/outcome is journaled here.
  */
 public final class MailDatabase {
-    private static final int SCHEMA_VERSION = 1;
+    private static final int SCHEMA_VERSION = 2;
     private final Connection connection;
 
     public MailDatabase(Connection connection) throws SQLException {
@@ -55,10 +55,18 @@ public final class MailDatabase {
                         item_variant INTEGER NOT NULL,
                         amount INTEGER NOT NULL,
                         checksum TEXT NOT NULL,
+                        durability INTEGER NOT NULL DEFAULT 0,
+                        item_status INTEGER NOT NULL DEFAULT 0,
+                        item_modifier TEXT NOT NULL DEFAULT '',
                         custody_state TEXT NOT NULL,
                         FOREIGN KEY(mail_id) REFERENCES mail_messages(id)
                     )
                     """);
+            ensureColumn(statement, "mail_attachments", "durability", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "mail_attachments", "item_status", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "mail_attachments", "item_modifier", "TEXT NOT NULL DEFAULT ''");
+            statement.execute("CREATE TABLE IF NOT EXISTS mail_recipient_favorites (owner_db_id INTEGER NOT NULL, "
+                    + "recipient_db_id INTEGER NOT NULL, PRIMARY KEY(owner_db_id, recipient_db_id))");
             statement.execute("""
                     CREATE TABLE IF NOT EXISTS mail_operations (
                         correlation_id TEXT PRIMARY KEY,
@@ -89,6 +97,48 @@ public final class MailDatabase {
             statement.execute("CREATE INDEX IF NOT EXISTS idx_mail_operations_state ON mail_operations(state, updated_at)");
             statement.execute("PRAGMA user_version = " + SCHEMA_VERSION);
         }
+    }
+
+    private void ensureColumn(Statement statement, String table, String column, String definition) throws SQLException {
+        try (ResultSet result = statement.executeQuery("PRAGMA table_info(" + table + ")")) {
+            while (result.next()) if (column.equalsIgnoreCase(result.getString("name"))) return;
+        }
+        statement.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);
+    }
+
+    public boolean toggleRecipientFavorite(int ownerDbId, int recipientDbId) throws SQLException {
+        if (ownerDbId <= 0 || recipientDbId <= 0 || ownerDbId == recipientDbId) return false;
+        try (PreparedStatement lookup = connection.prepareStatement("SELECT 1 FROM mail_recipient_favorites "
+                + "WHERE owner_db_id = ? AND recipient_db_id = ?")) {
+            lookup.setInt(1, ownerDbId);
+            lookup.setInt(2, recipientDbId);
+            try (ResultSet rows = lookup.executeQuery()) {
+                if (rows.next()) {
+                    try (PreparedStatement delete = connection.prepareStatement("DELETE FROM mail_recipient_favorites "
+                            + "WHERE owner_db_id = ? AND recipient_db_id = ?")) {
+                        delete.setInt(1, ownerDbId);
+                        delete.setInt(2, recipientDbId);
+                        return delete.executeUpdate() == 1;
+                    }
+                }
+            }
+        }
+        try (PreparedStatement insert = connection.prepareStatement("INSERT INTO mail_recipient_favorites "
+                + "(owner_db_id, recipient_db_id) VALUES (?, ?)")) {
+            insert.setInt(1, ownerDbId);
+            insert.setInt(2, recipientDbId);
+            return insert.executeUpdate() == 1;
+        }
+    }
+
+    public List<Integer> recipientFavoriteIds(int ownerDbId) throws SQLException {
+        List<Integer> ids = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement("SELECT recipient_db_id "
+                + "FROM mail_recipient_favorites WHERE owner_db_id = ?")) {
+            statement.setInt(1, ownerDbId);
+            try (ResultSet rows = statement.executeQuery()) { while (rows.next()) ids.add(rows.getInt(1)); }
+        }
+        return List.copyOf(ids);
     }
 
     /**
@@ -136,14 +186,17 @@ public final class MailDatabase {
             }
             for (MailAttachment attachment : attachments == null ? List.<MailAttachment>of() : attachments) {
                 try (PreparedStatement insert = connection.prepareStatement("""
-                        INSERT INTO mail_attachments(mail_id, item_name, item_variant, amount, checksum, custody_state)
-                        VALUES (?, ?, ?, ?, ?, 'RESERVED')
+                        INSERT INTO mail_attachments(mail_id, item_name, item_variant, amount, checksum, durability,
+                            item_status, item_modifier, custody_state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'RESERVED')
                         """)) {
                     insert.setString(1, mailId);
                     insert.setString(2, attachment.itemName());
                     insert.setInt(3, attachment.variant());
                     insert.setInt(4, attachment.amount());
                     insert.setString(5, attachment.checksum());
+                    insert.setInt(6, attachment.durability());
+                    insert.setShort(7, attachment.status());
+                    insert.setString(8, attachment.modifier());
                     insert.executeUpdate();
                 }
             }
@@ -537,14 +590,15 @@ public final class MailDatabase {
     private List<MailAttachment> heldAttachments(String mailId) throws SQLException {
         List<MailAttachment> attachments = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT item_name, item_variant, amount, checksum FROM mail_attachments
+                SELECT item_name, item_variant, amount, checksum, durability, item_status, item_modifier FROM mail_attachments
                 WHERE mail_id = ? AND custody_state = 'HELD_IN_MAIL' ORDER BY id ASC
                 """)) {
             statement.setString(1, mailId);
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     attachments.add(new MailAttachment(result.getString("item_name"), result.getInt("item_variant"),
-                            result.getInt("amount"), result.getString("checksum")));
+                            result.getInt("amount"), result.getString("checksum"), result.getInt("durability"),
+                            result.getShort("item_status"), result.getString("item_modifier")));
                 }
             }
         }
@@ -1010,14 +1064,15 @@ public final class MailDatabase {
     private List<MailAttachment> attachments(String mailId, String custodyState) throws SQLException {
         List<MailAttachment> entries = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT item_name, item_variant, amount, checksum FROM mail_attachments
+                SELECT item_name, item_variant, amount, checksum, durability, item_status, item_modifier FROM mail_attachments
                 WHERE mail_id = ? AND custody_state = ? ORDER BY id
                 """)) {
             statement.setString(1, mailId);
             statement.setString(2, custodyState);
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) entries.add(new MailAttachment(result.getString("item_name"),
-                        result.getInt("item_variant"), result.getInt("amount"), result.getString("checksum")));
+                        result.getInt("item_variant"), result.getInt("amount"), result.getString("checksum"),
+                        result.getInt("durability"), result.getShort("item_status"), result.getString("item_modifier")));
             }
         }
         return List.copyOf(entries);

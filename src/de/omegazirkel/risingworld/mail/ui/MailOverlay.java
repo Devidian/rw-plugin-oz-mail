@@ -9,6 +9,8 @@ import de.omegazirkel.risingworld.mail.MailInventoryTransfer;
 import de.omegazirkel.risingworld.tools.I18n;
 import de.omegazirkel.risingworld.tools.ui.BasePluginOverlayWithTabs;
 import de.omegazirkel.risingworld.tools.ui.ButtonFactory;
+import de.omegazirkel.risingworld.tools.ui.Dropdown;
+import de.omegazirkel.risingworld.tools.ui.DropdownOption;
 import de.omegazirkel.risingworld.tools.ui.InfoButton;
 import de.omegazirkel.risingworld.tools.ui.OZUIElement;
 import net.risingworld.api.objects.Player;
@@ -42,7 +44,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             .withZone(ZoneId.systemDefault());
 
     private enum MailTab {
-        INBOX, OUTBOX, ARCHIVE, COMPOSE, ADMIN
+        INBOX, OUTBOX, ARCHIVE, COMPOSE, PLAYERS, ADMIN
     }
 
     private final OZMail plugin;
@@ -51,7 +53,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     private UITextField subjectField;
     private UITextField bodyField;
     private UITextField codAmountField;
-    private UITextField codCurrencyField;
+    private Dropdown codCurrencyDropdown;
     private UITextField attachmentAmountField;
     private UILabel statusLabel;
     private UILabel selectedCandidateLabel;
@@ -64,6 +66,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     private String composeRecipient = "";
     private String composeSubject = "";
     private String composeBody = "";
+    private String selectedCodCurrency = "";
     private String selectedMailId;
     private String selectedAdminMailId;
     private MailDatabase.ReconciliationEntry selectedAdminEntry;
@@ -92,12 +95,17 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         tab(MailTab.OUTBOX, "MAIL_UI_TAB_OUTBOX", 130, false);
         tab(MailTab.ARCHIVE, "MAIL_UI_TAB_ARCHIVE", 130, false);
         tab(MailTab.COMPOSE, "MAIL_UI_TAB_COMPOSE", 150, false);
+        tab(MailTab.PLAYERS, "MAIL_UI_TAB_RECIPIENTS", 150, false);
         if (uiPlayer.isAdmin())
             tab(MailTab.ADMIN, "MAIL_UI_TAB_ADMIN", 140, true);
         body.removeAllChilds();
         addMailboxCapacityFooter();
         if (active == MailTab.COMPOSE) {
             setupCompose();
+            return;
+        }
+        if (active == MailTab.PLAYERS) {
+            setupPlayers();
             return;
         }
         if ((active == MailTab.INBOX || active == MailTab.OUTBOX || active == MailTab.ARCHIVE)
@@ -603,10 +611,8 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         }
         if (inbox && mail.hasAttachments()) {
             InfoButton claim = ButtonFactory.info(t().get("MAIL_UI_CLAIM", uiPlayer), event -> {
-                MailService.MailSendResult result = plugin.claimMail(uiPlayer, mail.id());
-                uiPlayer.sendTextMessage(t().get("MAIL_RESULT_" + result.code().name(), uiPlayer));
-                selectedMailId = null;
-                rebuild();
+                if (mail.codAmount() > 0L) showCodClaimConfirmation(mail);
+                else claimAttachments(mail.id());
             });
             claim.setPivot(Pivot.UpperLeft);
             claim.setPosition(404, 390, false);
@@ -654,24 +660,35 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         recipientField.setMaxCharacters(80);
         subjectField.setMaxCharacters(plugin.settings().maxSubjectLength);
         bodyField.setMaxCharacters(plugin.settings().maxBodyLength);
-        addComposeField(form, t().get("MAIL_UI_FIELD_RECIPIENT", uiPlayer), recipientField, 0, 0, 100, 30);
+        addComposeField(form, t().get("MAIL_UI_FIELD_RECIPIENT", uiPlayer), recipientField, 0, 0, 90, 30);
+        InfoButton recipients = ButtonFactory.info("☰", event -> {
+            active = MailTab.PLAYERS;
+            rebuild();
+        });
+        recipients.setPivot(Pivot.UpperLeft);
+        recipients.setPosition(0, 22, false);
+        recipients.style.left.set(92, Unit.Percent);
+        recipients.style.width.set(8, Unit.Percent);
+        recipients.style.height.set(30, Unit.Pixel);
+        form.addChild(recipients);
         addComposeField(form, t().get("MAIL_UI_FIELD_SUBJECT", uiPlayer), subjectField, 0, 60, 100, 30);
+        addComposeLimit(form, plugin.settings().maxSubjectLength, 0, 60, 100);
         addComposeField(form, t().get("MAIL_UI_FIELD_BODY", uiPlayer), bodyField, 0, 120, 100, 128);
+        addComposeLimit(form, plugin.settings().maxBodyLength, 0, 120, 100);
         if (plugin.settings().enableCod) {
             codAmountField = field("0");
             codAmountField.setMaxCharacters(18);
             if (plugin.hasMultipleWalletCurrencies()) {
-            codCurrencyField = field("");
-            codCurrencyField.setMaxCharacters(80);
-            addComposeField(form, t().get("MAIL_UI_FIELD_COD_AMOUNT", uiPlayer), codAmountField, 0, 280, 48, 30);
-            addComposeField(form, t().get("MAIL_UI_FIELD_COD_CURRENCY", uiPlayer), codCurrencyField, 52, 280, 48, 30);
+                codCurrencyDropdown = codCurrencyDropdown();
+                addComposeField(form, t().get("MAIL_UI_FIELD_COD_AMOUNT", uiPlayer), codAmountField, 0, 280, 48, 30);
+                addComposeField(form, t().get("MAIL_UI_FIELD_COD_CURRENCY", uiPlayer), codCurrencyDropdown, 52, 280, 48, 30);
             } else {
-                codCurrencyField = null;
+                codCurrencyDropdown = null;
                 addComposeField(form, t().get("MAIL_UI_FIELD_COD_AMOUNT", uiPlayer), codAmountField, 0, 280, 100, 30);
             }
         } else {
             codAmountField = null;
-            codCurrencyField = null;
+            codCurrencyDropdown = null;
         }
         setupAttachmentPanel();
         InfoButton send = ButtonFactory.info(t().get("MAIL_UI_SEND", uiPlayer), event -> sendCompose());
@@ -688,6 +705,62 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         statusLabel.style.height.set(38, Unit.Pixel);
         statusLabel.setTextWrap(true);
         form.addChild(statusLabel);
+    }
+
+    private void addComposeLimit(OZUIElement form, int limit, float x, int y, float width) {
+        UILabel label = new UILabel(t().get("MAIL_UI_LIMIT", uiPlayer).replace("PH_LIMIT", String.valueOf(limit)));
+        label.setPivot(Pivot.UpperLeft);
+        label.setPosition(0, y, false);
+        label.style.left.set(x, Unit.Percent);
+        label.style.width.set(width, Unit.Percent);
+        label.style.height.set(18, Unit.Pixel);
+        label.setFont(Font.Default);
+        label.setFontSize(12);
+        label.setTextAlign(TextAnchor.MiddleRight);
+        form.addChild(label);
+    }
+
+    private void setupPlayers() {
+        List<OZMail.Recipient> recipients = plugin.recentRecipients(uiPlayer);
+        UILabel heading = new UILabel(t().get("MAIL_UI_PLAYERS_INTRO", uiPlayer)
+                .replace("PH_DAYS", String.valueOf(plugin.recipientWindowDays(uiPlayer))));
+        heading.setPivot(Pivot.UpperLeft);
+        heading.setPosition(18, 16, false);
+        heading.setFont(Font.Default);
+        heading.setFontSize(14);
+        body.addChild(heading);
+        TableScrollView table = new TableScrollView(Arrays.asList(t().get("MAIL_UI_PLAYERS_COL_NAME", uiPlayer),
+                t().get("MAIL_UI_PLAYERS_COL_LAST_SEEN", uiPlayer), t().get("MAIL_UI_PLAYERS_COL_FAVORITE", uiPlayer),
+                t().get("MAIL_UI_COL_ACTION", uiPlayer)), Arrays.asList(35f, 25f, 18f, 22f));
+        table.setPosition(0, 48, false);
+        table.style.width.set(100, Unit.Percent);
+        table.setScrollBodyHeight(350);
+        for (OZMail.Recipient recipient : recipients) table.addRow(playerRow(recipient));
+        body.addChild(table.getRoot());
+        if (recipients.isEmpty()) addMessage("MAIL_UI_PLAYERS_EMPTY", 80);
+    }
+
+    private TableRow playerRow(OZMail.Recipient recipient) {
+        InfoButton favorite = ButtonFactory.info(t().get(recipient.favorite() ? "MAIL_UI_PLAYERS_UNFAVORITE" : "MAIL_UI_PLAYERS_FAVORITE", uiPlayer), event -> {
+            plugin.toggleRecipientFavorite(uiPlayer, recipient.dbId());
+            rebuild();
+        });
+        favorite.style.width.set(94, Unit.Percent);
+        favorite.style.height.set(24, Unit.Pixel);
+        InfoButton compose = ButtonFactory.info(t().get("MAIL_UI_PLAYERS_COMPOSE", uiPlayer), event -> {
+            composeRecipient = recipient.name();
+            active = MailTab.COMPOSE;
+            rebuild();
+        });
+        compose.style.width.set(94, Unit.Percent);
+        compose.style.height.set(24, Unit.Pixel);
+        return new TableRow(Arrays.asList(tableCell(recipient.name(), 35f),
+                tableCell(formatLastSeen(recipient.lastSeenEpochSeconds()), 25f), new TableCell(favorite, 18f),
+                new TableCell(compose, 22f)));
+    }
+
+    private String formatLastSeen(long epochSeconds) {
+        return epochSeconds <= 0 ? "-" : MAIL_DATE_FORMAT.format(Instant.ofEpochSecond(epochSeconds));
     }
 
     private void sendCompose() {
@@ -707,13 +780,25 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
                 setStatus("MAIL_RESULT_INVALID_REQUEST");
                 return;
             }
-            if (codCurrencyField == null) {
+            if (codCurrencyDropdown == null) {
                 submitCompose(codAmount, "");
             } else {
-                codCurrencyField.getCurrentText(uiPlayer, currency -> submitCompose(codAmount,
-                        currency == null ? "" : currency.trim()));
+                submitCompose(codAmount, selectedCodCurrency);
             }
         });
+    }
+
+    private Dropdown codCurrencyDropdown() {
+        String defaultCurrency = plugin.defaultWalletCurrencyIdentifier();
+        List<DropdownOption> options = plugin.walletCurrencyIdentifiers().stream()
+                .map(currency -> new DropdownOption(currency.equals(defaultCurrency) ? "" : currency,
+                        currency + (currency.equals(defaultCurrency) ? " *" : "")))
+                .toList();
+        Dropdown dropdown = new Dropdown(options, selectedCodCurrency,
+                key -> selectedCodCurrency = key == null ? "" : key);
+        dropdown.setPivot(Pivot.UpperLeft);
+        dropdown.setSize(160, 30, false);
+        return dropdown;
     }
 
     private void submitCompose(long codAmount, String currency) {
@@ -742,10 +827,61 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         rebuild();
     }
 
+    private void claimAttachments(String mailId) {
+        MailService.MailSendResult result = plugin.claimMail(uiPlayer, mailId);
+        String key = result.success() ? "MAIL_RESULT_CLAIM_SUCCESS" : "MAIL_RESULT_" + result.code().name();
+        uiPlayer.sendTextMessage(t().get(key, uiPlayer));
+        if (result.success()) {
+            selectedMailId = null;
+            rebuild();
+        }
+    }
+
+    private void showCodClaimConfirmation(MailDatabase.MailDetail mail) {
+        UIElement dialog = new UIElement();
+        dialog.setPivot(Pivot.MiddleCenter);
+        dialog.setPosition(50, 50, true);
+        dialog.setSize(520, 220, false);
+        dialog.setBackgroundColor(0x10100EF5);
+        dialog.setBorder(1);
+        dialog.setBorderColor(0xC6953FFF);
+        dialog.setBorderEdgeRadius(6, false);
+        UILabel title = new UILabel(t().get("MAIL_UI_COD_CONFIRM_TITLE", uiPlayer));
+        title.setPivot(Pivot.UpperCenter);
+        title.setPosition(50, 16, true);
+        title.setFont(Font.DefaultBold);
+        title.setFontSize(20);
+        dialog.addChild(title);
+        UILabel message = new UILabel(t().get("MAIL_UI_COD_CONFIRM_BODY", uiPlayer)
+                .replace("PH_AMOUNT", String.valueOf(mail.codAmount()))
+                .replace("PH_CURRENCY", mail.codCurrency()));
+        message.setPivot(Pivot.UpperLeft);
+        message.setPosition(24, 64, false);
+        message.setSize(472, 70, false);
+        message.setFontSize(15);
+        message.setTextWrap(true);
+        dialog.addChild(message);
+        InfoButton cancel = ButtonFactory.info(t().get("MAIL_UI_CANCEL", uiPlayer), event -> uiPlayer.removeUIElement(dialog));
+        cancel.setPivot(Pivot.UpperLeft);
+        cancel.setPosition(24, 164, false);
+        cancel.setSize(140, 32, false);
+        dialog.addChild(cancel);
+        InfoButton confirm = ButtonFactory.info(t().get("MAIL_UI_COD_CONFIRM", uiPlayer), event -> {
+            uiPlayer.removeUIElement(dialog);
+            claimAttachments(mail.id());
+        });
+        confirm.setPivot(Pivot.UpperRight);
+        confirm.setPosition(496, 164, false);
+        confirm.setSize(180, 32, false);
+        dialog.addChild(confirm);
+        uiPlayer.addUIElement(dialog);
+    }
+
     private void resetComposeDraft() {
         composeRecipient = "";
         composeSubject = "";
         composeBody = "";
+        selectedCodCurrency = "";
         selectedCandidate = null;
         selectedAttachments.clear();
         attachmentsConfirmed = false;
@@ -980,7 +1116,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         parent.addChild(button);
     }
 
-    private void addComposeField(OZUIElement form, String labelText, UITextField field, float x, int y,
+    private void addComposeField(OZUIElement form, String labelText, UIElement field, float x, int y,
             float width, int height) {
         UILabel label = new UILabel(labelText);
         label.setPivot(Pivot.UpperLeft);
@@ -990,7 +1126,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         label.setFont(Font.DefaultBold);
         label.setFontSize(13);
         form.addChild(label);
-        if (field.isMultiLine()) {
+        if (field instanceof UITextField textField && textField.isMultiLine()) {
             OZUIElement background = new OZUIElement();
             background.setPivot(Pivot.UpperLeft);
             background.setPosition(0, 0, false);
@@ -1003,8 +1139,8 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             background.setBorderColor(0.95f, 0.75f, 0.25f, 0.46f);
             background.setBorderEdgeRadius(4, false);
             form.addChild(background);
-            field.setBackgroundColor(0x00000000);
-            field.setBorderEdgeRadius(4, false);
+            textField.setBackgroundColor(0x00000000);
+            textField.setBorderEdgeRadius(4, false);
         }
         field.setPivot(Pivot.UpperLeft);
         field.setPosition(0, 0, false);
@@ -1053,6 +1189,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             case OUTBOX -> "MAIL_UI_OUTBOX_EMPTY";
             case ARCHIVE -> "MAIL_UI_ARCHIVE_EMPTY";
             case COMPOSE -> "MAIL_UI_COMPOSE_INTRO";
+            case PLAYERS -> "MAIL_UI_PLAYERS_EMPTY";
             case ADMIN -> "MAIL_UI_ADMIN_INTRO";
         };
     }

@@ -7,6 +7,10 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Comparator;
 
 import de.omegazirkel.risingworld.mail.MailDatabase;
 import de.omegazirkel.risingworld.mail.MailAttachment;
@@ -63,6 +67,12 @@ public final class OZMail extends Plugin implements Listener {
     public boolean hasMultipleWalletCurrencies() {
         return walletBridge != null && walletBridge.currencyIdentifiers().size() >= 2;
     }
+    public List<String> walletCurrencyIdentifiers() {
+        return walletBridge == null ? List.of() : walletBridge.currencyIdentifiers();
+    }
+    public String defaultWalletCurrencyIdentifier() {
+        return walletBridge == null ? "" : walletBridge.defaultCurrencyIdentifier();
+    }
     public int mailboxCapacity(Player player) {
         return mailboxCapacity == null ? settings.mailboxLimit : mailboxCapacity.mailboxCapacity(player, settings.mailboxLimit);
     }
@@ -79,6 +89,33 @@ public final class OZMail extends Plugin implements Listener {
     public int mailboxUsage(Player player) {
         return mailService == null ? 0 : mailService.mailboxUsage(player);
     }
+
+    public List<Recipient> recentRecipients(Player player) {
+        if (player == null || settings == null) return List.of();
+        long cutoff = (System.currentTimeMillis() / 1000L) - (recipientWindowDays(player) * 86_400L);
+        Set<Integer> ids = new HashSet<>(PlayerDatabaseHelper.findPlayersSeenSince(this, cutoff));
+        ids.remove(player.getDbID());
+        Map<Integer, PlayerDatabaseHelper.PlayerRecord> records = PlayerDatabaseHelper.findPlayersByDbIds(this, ids);
+        Set<Integer> favorites = new HashSet<>(recipientFavoriteIds(player));
+        return records.values().stream().filter(record -> record.name != null && !record.name.isBlank())
+                .map(record -> new Recipient(record.dbId, record.name, record.lastSeenEpochSeconds, favorites.contains(record.dbId)))
+                .sorted(Comparator.comparing(Recipient::favorite).reversed()
+                        .thenComparing(Recipient::name, String.CASE_INSENSITIVE_ORDER)).toList();
+    }
+
+    public int recipientWindowDays(Player player) {
+        return MailPlayerPreferences.recipientWindowDays(player, settings == null ? 30 : settings.recentPlayerDays);
+    }
+
+    public List<Integer> recipientFavoriteIds(Player player) {
+        return mailService == null ? List.of() : mailService.recipientFavoriteIds(player);
+    }
+
+    public boolean toggleRecipientFavorite(Player player, int recipientDbId) {
+        return mailService != null && mailService.toggleRecipientFavorite(player, recipientDbId);
+    }
+
+    public record Recipient(int dbId, String name, long lastSeenEpochSeconds, boolean favorite) { }
 
     public List<MailDatabase.MailSummary> outbox(Player player) {
         return mailService == null ? List.of() : mailService.outbox(player);

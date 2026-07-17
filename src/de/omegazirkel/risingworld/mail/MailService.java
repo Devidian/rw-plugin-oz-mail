@@ -94,6 +94,16 @@ public final class MailService {
         }
     }
 
+    public List<Integer> recipientFavoriteIds(Player player) {
+        if (player == null || player.getDbID() <= 0) return List.of();
+        try { return database.recipientFavoriteIds(player.getDbID()); } catch (SQLException ex) { return List.of(); }
+    }
+
+    public boolean toggleRecipientFavorite(Player player, int recipientDbId) {
+        if (player == null || player.getDbID() <= 0) return false;
+        try { return database.toggleRecipientFavorite(player.getDbID(), recipientDbId); } catch (SQLException ex) { return false; }
+    }
+
     public List<MailDatabase.MailSummary> outbox(Player player) {
         return summaries(player, false);
     }

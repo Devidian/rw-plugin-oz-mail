@@ -1,5 +1,13 @@
 # History
 
+## [0.1.4] - 2026-07-17 | Mail workflow refinements
+
+- fix: show a claim-specific success message and require confirmation before a COD attachment claim
+- fix: align compose recipient picker and static field limits with the Mail overlay layout
+- change: rename the player tab to recipients
+- feat: select the COD currency from the Wallet currency dropdown
+- feat: let players configure their own recipient-list period, defaulting to the server value
+
 ## [0.1.3] - 2026-07-17 | Release package validation
 
 - fix: validate the distributable ZIP in CI using the Maven package lifecycle
