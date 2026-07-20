@@ -63,7 +63,9 @@ jobs:
         run: |
           test "${GITHUB_REF_NAME#v}" = "$(sed -n 's/^version: //p' src/resources/plugin.yml)"
           test "${GITHUB_REF_NAME#v}" = "$(sed -n 's:.*<version>\([^<]*\)</version>.*:\1:p' pom.xml | head -n 1)"
+          test -s "release-notes/${GITHUB_REF_NAME#v}.md"
       - run: mvn -B -DskipTests package
       - uses: softprops/action-gh-release@v2
         with:
+          body_path: "release-notes/${GITHUB_REF_NAME#v}.md"
           files: dist/*.zip
