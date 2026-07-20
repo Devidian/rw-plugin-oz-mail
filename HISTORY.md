@@ -1,5 +1,9 @@
 # History
 
+## [0.1.7] - 2026-07-20 | Advanced button controls
+
+- change: use the stable shared OZ button controls in mailbox and settings overlays
+
 ## [0.1.6] - 2026-07-20 | Settings localization
 
 - fix: localize the recipient-list time-window setting in the admin settings UI

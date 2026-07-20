@@ -2,8 +2,8 @@ package de.omegazirkel.risingworld.mail.ui;
 
 import de.omegazirkel.risingworld.OZMail;
 import de.omegazirkel.risingworld.tools.ui.BasePlayerPluginSettingsPanel;
-import de.omegazirkel.risingworld.tools.ui.ButtonFactory;
-import de.omegazirkel.risingworld.tools.ui.InfoButton;
+import de.omegazirkel.risingworld.tools.ui.AdvancedButtonFactory;
+import de.omegazirkel.risingworld.tools.ui.AdvancedButton;
 import de.omegazirkel.risingworld.tools.ui.OZUIElement;
 import de.omegazirkel.risingworld.tools.ui.PlayerPluginSettings;
 import net.risingworld.api.objects.Player;
@@ -46,7 +46,7 @@ public final class MailPlayerPluginSettings extends PlayerPluginSettings {
                 days.setMaxCharacters(4);
                 setting.addChild(days);
 
-                InfoButton save = ButtonFactory.info(plugin.text("MAIL_SETTINGS_SAVE", player), event ->
+                AdvancedButton save = AdvancedButtonFactory.defaultButton(plugin.text("MAIL_SETTINGS_SAVE", player), event ->
                         days.getCurrentText(player, value -> {
                             try {
                                 if (value != null) {

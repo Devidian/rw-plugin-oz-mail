@@ -8,10 +8,10 @@ import de.omegazirkel.risingworld.mail.MailAttachment;
 import de.omegazirkel.risingworld.mail.MailInventoryTransfer;
 import de.omegazirkel.risingworld.tools.I18n;
 import de.omegazirkel.risingworld.tools.ui.BasePluginOverlayWithTabs;
-import de.omegazirkel.risingworld.tools.ui.ButtonFactory;
+import de.omegazirkel.risingworld.tools.ui.AdvancedButtonFactory;
 import de.omegazirkel.risingworld.tools.ui.Dropdown;
 import de.omegazirkel.risingworld.tools.ui.DropdownOption;
-import de.omegazirkel.risingworld.tools.ui.InfoButton;
+import de.omegazirkel.risingworld.tools.ui.AdvancedButton;
 import de.omegazirkel.risingworld.tools.ui.OZUIElement;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.ui.UIElement;
@@ -58,8 +58,8 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     private UILabel statusLabel;
     private UILabel selectedCandidateLabel;
     private UILabel attachmentsLabel;
-    private InfoButton clearAttachmentsButton;
-    private InfoButton confirmAttachmentsButton;
+    private AdvancedButton clearAttachmentsButton;
+    private AdvancedButton confirmAttachmentsButton;
     private MailInventoryTransfer.AttachmentCandidate selectedCandidate;
     private final Map<String, MailAttachment> selectedAttachments = new LinkedHashMap<>();
     private boolean attachmentsConfirmed;
@@ -125,7 +125,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         if (!messages.isEmpty()) {
             int y = 18;
             for (MailDatabase.MailSummary mail : messages) {
-                InfoButton row = ButtonFactory.info(mail.subject() + " | " + mail.senderName()
+                AdvancedButton row = AdvancedButtonFactory.defaultButton(mail.subject() + " | " + mail.senderName()
                         + (mail.hasAttachments() ? " | " + t().get("MAIL_UI_ATTACHMENT", uiPlayer) : ""), event -> {
                             if (active == MailTab.INBOX || active == MailTab.OUTBOX) {
                                 selectedMailId = mail.id();
@@ -186,7 +186,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     }
 
     private TableRow mailRow(MailDatabase.MailSummary mail, boolean inbox) {
-        InfoButton open = ButtonFactory.info(t().get("MAIL_UI_OPEN", uiPlayer), event -> {
+        AdvancedButton open = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_OPEN", uiPlayer), event -> {
             selectedMailId = mail.id();
             rebuild();
         });
@@ -236,13 +236,13 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         referenceField.setPosition(190, 14, false);
         referenceField.setSize(200, 30, false);
         body.addChild(referenceField);
-        InfoButton search = ButtonFactory.info(t().get("MAIL_UI_ADMIN_SEARCH_BUTTON", uiPlayer),
+        AdvancedButton search = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ADMIN_SEARCH_BUTTON", uiPlayer),
                 event -> referenceField.getCurrentText(uiPlayer, this::openAdminReference));
         search.setPivot(Pivot.UpperLeft);
         search.setPosition(402, 14, false);
         search.setSize(90, 30, false);
         body.addChild(search);
-        InfoButton export = ButtonFactory.info(t().get("MAIL_UI_ADMIN_EXPORT_QUEUE", uiPlayer),
+        AdvancedButton export = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ADMIN_EXPORT_QUEUE", uiPlayer),
                 event -> plugin.exportReconciliationQueue(uiPlayer).ifPresentOrElse(
                         file -> uiPlayer.sendTextMessage(t().get("MAIL_UI_ADMIN_EXPORT_SUCCESS", uiPlayer)
                                 .replace("PH_FILE", file)),
@@ -293,7 +293,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             if (!isVisibleInAdminQueue(entry))
                 continue;
             anyVisible = true;
-            InfoButton label = ButtonFactory.info(t().get("MAIL_UI_ADMIN_QUEUE_ENTRY", uiPlayer)
+            AdvancedButton label = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ADMIN_QUEUE_ENTRY", uiPlayer)
                     .replace("PH_OPERATION", operationText(entry.operationType()))
                     .replace("PH_MAIL_ID", entry.mailId()), event -> {
                         selectedAdminMailId = entry.mailId();
@@ -318,7 +318,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
 
     private void addAdminQueueFilter(String filter, String labelKey, int x, int width) {
         String prefix = filter.equals(adminOperationFilter) ? "• " : "";
-        InfoButton button = ButtonFactory.info(prefix + t().get(labelKey, uiPlayer), event -> {
+        AdvancedButton button = AdvancedButtonFactory.defaultButton(prefix + t().get(labelKey, uiPlayer), event -> {
             adminOperationFilter = filter;
             rebuild();
         });
@@ -377,7 +377,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         if (selectedAdminEntry != null && "CLAIM".equals(selectedAdminEntry.operationType())) {
             setupVerifiedClaimResolution(265);
         }
-        InfoButton back = ButtonFactory.info(t().get("MAIL_UI_BACK", uiPlayer), event -> {
+        AdvancedButton back = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_BACK", uiPlayer), event -> {
             selectedAdminMailId = null;
             selectedAdminEntry = null;
             rebuild();
@@ -405,13 +405,13 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         reasonField.setPosition(150, y + 24, false);
         reasonField.setSize(430, 30, false);
         body.addChild(reasonField);
-        InfoButton held = ButtonFactory.info(t().get("MAIL_UI_ADMIN_RESOLVE_HELD", uiPlayer),
+        AdvancedButton held = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ADMIN_RESOLVE_HELD", uiPlayer),
                 event -> resolveVerifiedSend(reasonField, MailDatabase.VerifiedSendOutcome.HELD_IN_MAIL));
         held.setPivot(Pivot.UpperLeft);
         held.setPosition(18, y + 62, false);
         held.setSize(260, 30, false);
         body.addChild(held);
-        InfoButton returned = ButtonFactory.info(t().get("MAIL_UI_ADMIN_RESOLVE_RETURNED", uiPlayer),
+        AdvancedButton returned = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ADMIN_RESOLVE_RETURNED", uiPlayer),
                 event -> resolveVerifiedSend(reasonField, MailDatabase.VerifiedSendOutcome.RETURNED_TO_SENDER));
         returned.setPivot(Pivot.UpperLeft);
         returned.setPosition(290, y + 62, false);
@@ -456,13 +456,13 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         reasonField.setPosition(150, y + 24, false);
         reasonField.setSize(430, 30, false);
         body.addChild(reasonField);
-        InfoButton claimed = ButtonFactory.info(t().get("MAIL_UI_ADMIN_RESOLVE_CLAIMED", uiPlayer),
+        AdvancedButton claimed = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ADMIN_RESOLVE_CLAIMED", uiPlayer),
                 event -> resolveVerifiedClaim(reasonField, false));
         claimed.setPivot(Pivot.UpperLeft);
         claimed.setPosition(18, y + 62, false);
         claimed.setSize(260, 30, false);
         body.addChild(claimed);
-        InfoButton refund = ButtonFactory.info(t().get("MAIL_UI_ADMIN_RESOLVE_COD_REFUND", uiPlayer),
+        AdvancedButton refund = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ADMIN_RESOLVE_COD_REFUND", uiPlayer),
                 event -> resolveVerifiedClaim(reasonField, true));
         refund.setPivot(Pivot.UpperLeft);
         refund.setPosition(290, y + 62, false);
@@ -580,7 +580,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             cod.setFontSize(13);
             body.addChild(cod);
         }
-        InfoButton back = ButtonFactory.info(t().get("MAIL_UI_BACK", uiPlayer), event -> {
+        AdvancedButton back = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_BACK", uiPlayer), event -> {
             selectedMailId = null;
             rebuild();
         });
@@ -589,14 +589,14 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         back.setSize(110, 30, false);
         body.addChild(back);
         if (inbox) {
-            InfoButton reply = ButtonFactory.info(t().get("MAIL_UI_REPLY", uiPlayer), event -> startReply(mail));
+            AdvancedButton reply = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_REPLY", uiPlayer), event -> startReply(mail));
             reply.setPivot(Pivot.UpperLeft);
             reply.setPosition(140, 390, false);
             reply.setSize(110, 30, false);
             body.addChild(reply);
         }
         if (inbox && !mail.hasAttachments() && MailMessageState.ARCHIVED.name().equals(mail.state()) == false) {
-            InfoButton archive = ButtonFactory.info(t().get("MAIL_UI_ARCHIVE", uiPlayer), event -> {
+            AdvancedButton archive = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ARCHIVE", uiPlayer), event -> {
                 boolean archived = plugin.archiveMail(uiPlayer, mail.id());
                 uiPlayer.sendTextMessage(t().get(archived ? "MAIL_UI_ARCHIVE_SUCCESS" : "MAIL_UI_ARCHIVE_FAILED", uiPlayer));
                 if (archived) {
@@ -610,7 +610,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             body.addChild(archive);
         }
         if (inbox && mail.hasAttachments()) {
-            InfoButton claim = ButtonFactory.info(t().get("MAIL_UI_CLAIM", uiPlayer), event -> {
+            AdvancedButton claim = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_CLAIM", uiPlayer), event -> {
                 if (mail.codAmount() > 0L) showCodClaimConfirmation(mail);
                 else claimAttachments(mail.id());
             });
@@ -618,7 +618,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             claim.setPosition(404, 390, false);
             claim.setSize(130, 30, false);
             body.addChild(claim);
-            InfoButton returnToSender = ButtonFactory.info(t().get("MAIL_UI_RETURN", uiPlayer), event -> {
+            AdvancedButton returnToSender = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_RETURN", uiPlayer), event -> {
                 MailService.MailSendResult result = plugin.returnMailToSender(uiPlayer, mail.id());
                 uiPlayer.sendTextMessage(t().get("MAIL_RESULT_" + result.code().name(), uiPlayer));
                 selectedMailId = null;
@@ -630,7 +630,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             body.addChild(returnToSender);
         }
         if (inbox && !mail.hasAttachments()) {
-            InfoButton delete = ButtonFactory.info(t().get("MAIL_UI_DELETE", uiPlayer), event ->
+            AdvancedButton delete = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_DELETE", uiPlayer), event ->
                     showDeleteConfirmation(true, mail.id()));
             delete.setPivot(Pivot.UpperLeft);
             delete.setPosition(404, 390, false);
@@ -638,7 +638,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             body.addChild(delete);
         }
         if (!inbox && !mail.hasAttachments()) {
-            InfoButton delete = ButtonFactory.info(t().get("MAIL_UI_DELETE", uiPlayer), event ->
+            AdvancedButton delete = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_DELETE", uiPlayer), event ->
                     showDeleteConfirmation(false, mail.id()));
             delete.setPivot(Pivot.UpperLeft);
             delete.setPosition(140, 390, false);
@@ -661,7 +661,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         subjectField.setMaxCharacters(plugin.settings().maxSubjectLength);
         bodyField.setMaxCharacters(plugin.settings().maxBodyLength);
         addComposeField(form, t().get("MAIL_UI_FIELD_RECIPIENT", uiPlayer), recipientField, 0, 0, 90, 30);
-        InfoButton recipients = ButtonFactory.info("☰", event -> {
+        AdvancedButton recipients = AdvancedButtonFactory.defaultButton("☰", event -> {
             active = MailTab.PLAYERS;
             rebuild();
         });
@@ -691,7 +691,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             codCurrencyDropdown = null;
         }
         setupAttachmentPanel();
-        InfoButton send = ButtonFactory.info(t().get("MAIL_UI_SEND", uiPlayer), event -> sendCompose());
+        AdvancedButton send = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_SEND", uiPlayer), event -> sendCompose());
         send.setPivot(Pivot.UpperLeft);
         send.setPosition(0, 346, false);
         send.setSize(150, 32, false);
@@ -741,13 +741,13 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     }
 
     private TableRow playerRow(OZMail.Recipient recipient) {
-        InfoButton favorite = ButtonFactory.info(t().get(recipient.favorite() ? "MAIL_UI_PLAYERS_UNFAVORITE" : "MAIL_UI_PLAYERS_FAVORITE", uiPlayer), event -> {
+        AdvancedButton favorite = AdvancedButtonFactory.defaultButton(t().get(recipient.favorite() ? "MAIL_UI_PLAYERS_UNFAVORITE" : "MAIL_UI_PLAYERS_FAVORITE", uiPlayer), event -> {
             plugin.toggleRecipientFavorite(uiPlayer, recipient.dbId());
             rebuild();
         });
         favorite.style.width.set(94, Unit.Percent);
         favorite.style.height.set(24, Unit.Pixel);
-        InfoButton compose = ButtonFactory.info(t().get("MAIL_UI_PLAYERS_COMPOSE", uiPlayer), event -> {
+        AdvancedButton compose = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_PLAYERS_COMPOSE", uiPlayer), event -> {
             composeRecipient = recipient.name();
             active = MailTab.COMPOSE;
             rebuild();
@@ -861,12 +861,12 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         message.setFontSize(15);
         message.setTextWrap(true);
         dialog.addChild(message);
-        InfoButton cancel = ButtonFactory.info(t().get("MAIL_UI_CANCEL", uiPlayer), event -> uiPlayer.removeUIElement(dialog));
+        AdvancedButton cancel = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_CANCEL", uiPlayer), event -> uiPlayer.removeUIElement(dialog));
         cancel.setPivot(Pivot.UpperLeft);
         cancel.setPosition(24, 164, false);
         cancel.setSize(140, 32, false);
         dialog.addChild(cancel);
-        InfoButton confirm = ButtonFactory.info(t().get("MAIL_UI_COD_CONFIRM", uiPlayer), event -> {
+        AdvancedButton confirm = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_COD_CONFIRM", uiPlayer), event -> {
             uiPlayer.removeUIElement(dialog);
             claimAttachments(mail.id());
         });
@@ -909,12 +909,12 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         message.setFontSize(15);
         message.setTextWrap(true);
         dialog.addChild(message);
-        InfoButton cancel = ButtonFactory.info(t().get("MAIL_UI_CANCEL", uiPlayer), event -> uiPlayer.removeUIElement(dialog));
+        AdvancedButton cancel = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_CANCEL", uiPlayer), event -> uiPlayer.removeUIElement(dialog));
         cancel.setPivot(Pivot.UpperLeft);
         cancel.setPosition(24, 164, false);
         cancel.setSize(140, 32, false);
         dialog.addChild(cancel);
-        InfoButton confirm = ButtonFactory.info(t().get("MAIL_UI_DELETE_CONFIRM", uiPlayer), event -> {
+        AdvancedButton confirm = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_DELETE_CONFIRM", uiPlayer), event -> {
             boolean deleted = inbox ? plugin.deleteInboxMail(uiPlayer, mailId) : plugin.deleteOutboxMail(uiPlayer, mailId);
             uiPlayer.removeUIElement(dialog);
             uiPlayer.sendTextMessage(t().get(deleted ? "MAIL_UI_DELETE_SUCCESS" : "MAIL_UI_DELETE_FAILED", uiPlayer));
@@ -955,7 +955,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         for (MailInventoryTransfer.AttachmentCandidate candidate : MailInventoryTransfer
                 .attachmentCandidates(uiPlayer)) {
             int y = scroll.getChildCount() * 30;
-            InfoButton button = ButtonFactory.info(candidate.displayName() + " x" + candidate.availableAmount(),
+            AdvancedButton button = AdvancedButtonFactory.defaultButton(candidate.displayName() + " x" + candidate.availableAmount(),
                     event -> {
                         selectedCandidate = candidate;
                         selectedCandidateLabel.setText(t().get("MAIL_UI_ATTACHMENT_SELECTED", uiPlayer)
@@ -993,13 +993,13 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         attachmentAmountField.setSize(34, 9, true);
         panel.addChild(attachmentAmountField);
 
-        InfoButton addAttachment = ButtonFactory.info(t().get("MAIL_UI_ATTACHMENT_ADD", uiPlayer),
+        AdvancedButton addAttachment = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ATTACHMENT_ADD", uiPlayer),
                 event -> addAttachment());
         addAttachment.setPivot(Pivot.UpperLeft);
         addAttachment.setPosition(61, 51, true);
         addAttachment.setSize(34, 9, true);
         panel.addChild(addAttachment);
-        clearAttachmentsButton = ButtonFactory.info(t().get("MAIL_UI_ATTACHMENT_CLEAR", uiPlayer), event -> {
+        clearAttachmentsButton = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ATTACHMENT_CLEAR", uiPlayer), event -> {
             selectedAttachments.clear();
             attachmentsConfirmed = false;
             updateAttachmentSummary();
@@ -1009,7 +1009,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         clearAttachmentsButton.setSize(34, 9, true);
         panel.addChild(clearAttachmentsButton);
 
-        confirmAttachmentsButton = ButtonFactory.info(t().get("MAIL_UI_ATTACHMENT_CONFIRM", uiPlayer), event -> {
+        confirmAttachmentsButton = AdvancedButtonFactory.defaultButton(t().get("MAIL_UI_ATTACHMENT_CONFIRM", uiPlayer), event -> {
             if (selectedAttachments.isEmpty()) {
                 setStatus("MAIL_UI_ATTACHMENTS_EMPTY");
                 return;
@@ -1101,7 +1101,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         refreshButtonParent(confirmAttachmentsButton);
     }
 
-    private void styleAttachmentButton(InfoButton button, int background, int hover) {
+    private void styleAttachmentButton(AdvancedButton button, int background, int hover) {
         button.setBackgroundColor(background);
         button.setHoverBackgroundColor(hover);
         button.setBorder(1);
@@ -1109,7 +1109,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     }
 
     /** Rising World's hover style cache needs a reattach after enabled-state changes. */
-    private void refreshButtonParent(InfoButton button) {
+    private void refreshButtonParent(AdvancedButton button) {
         UIElement parent = button.getParent();
         if (parent == null) return;
         parent.removeChild(button);
