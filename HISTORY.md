@@ -1,5 +1,9 @@
 # History
 
+## [0.1.6] - 2026-07-20 | Settings localization
+
+- fix: localize the recipient-list time-window setting in the admin settings UI
+
 ## [0.1.5] - 2026-07-20 | Update metadata
 
 - change: publish the canonical GitHub release source for OZ Tools update management
