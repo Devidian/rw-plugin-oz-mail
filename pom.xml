@@ -6,7 +6,7 @@
 
     <groupId>com.github.devidian</groupId>
     <artifactId>rw-plugin-oz-mail</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <name>OZMail</name>
     <description>In-game mail for Rising World</description>
 

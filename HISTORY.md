@@ -1,5 +1,9 @@
 # History
 
+## [0.1.5] - 2026-07-20 | Update metadata
+
+- change: publish the canonical GitHub release source for OZ Tools update management
+
 ## [0.1.4] - 2026-07-17 | Mail workflow refinements
 
 - fix: show a claim-specific success message and require confirmation before a COD attachment claim
