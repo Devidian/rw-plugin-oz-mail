@@ -65,7 +65,9 @@ jobs:
           test "${GITHUB_REF_NAME#v}" = "$(sed -n 's:.*<version>\([^<]*\)</version>.*:\1:p' pom.xml | head -n 1)"
           test -s "release-notes/${GITHUB_REF_NAME#v}.md"
       - run: mvn -B -DskipTests package
+      - name: Prepare release notes
+        run: cp "release-notes/${GITHUB_REF_NAME#v}.md" release-notes/current.md
       - uses: softprops/action-gh-release@v2
         with:
-          body_path: "release-notes/${GITHUB_REF_NAME#v}.md"
+          body_path: release-notes/current.md
           files: dist/*.zip
