@@ -1,5 +1,9 @@
 # History
 
+## [0.1.8] - 2026-07-21 | Shared Tools update
+
+- change: update the shared OZ Tools dependency to version 0.23.1
+
 ## [0.1.7] - 2026-07-20 | Advanced button controls
 
 - change: use the stable shared OZ button controls in mailbox and settings overlays
