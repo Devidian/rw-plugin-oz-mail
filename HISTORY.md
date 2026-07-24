@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+## [0.1.9] - 2026-07-24 | Shared runtime bridges
+
 - refactor: use the synchronized optional Discord bridge
+- refactor: keep the plugin entry point limited to lifecycle wiring and event delegation
+- change: update the shared OZ Tools dependency to version 0.23.8
 
 ## [0.1.8] - 2026-07-21 | Shared Tools update
 
