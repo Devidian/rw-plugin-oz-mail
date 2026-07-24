@@ -1,5 +1,9 @@
 # History
 
+## Unreleased
+
+- refactor: use the synchronized optional Discord bridge
+
 ## [0.1.8] - 2026-07-21 | Shared Tools update
 
 - change: update the shared OZ Tools dependency to version 0.23.1

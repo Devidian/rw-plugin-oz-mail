@@ -21,7 +21,7 @@ import de.omegazirkel.risingworld.mail.MailDiscordAuditBridge;
 import de.omegazirkel.risingworld.mail.MailSettings;
 import de.omegazirkel.risingworld.mail.MailboxCapacityService;
 import de.omegazirkel.risingworld.mail.MailboxShopIntegration;
-import de.omegazirkel.risingworld.mail.WalletBridge;
+import de.omegazirkel.risingworld.tools.bridge.WalletBridge;
 import de.omegazirkel.risingworld.mail.ui.MailGui;
 import de.omegazirkel.risingworld.mail.ui.MailPluginInfoStatusProvider;
 import de.omegazirkel.risingworld.mail.ui.MailPlayerPluginData;

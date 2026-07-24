@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+import de.omegazirkel.risingworld.tools.bridge.WalletBridge;
+
 import net.risingworld.api.objects.Player;
 
 /** First mail saga: durable intent, sender inventory custody, then delivery. */
@@ -166,9 +168,11 @@ public final class MailService {
             MailDatabase.ClaimPreparation claim = database.prepareClaim(player.getDbID(), mailId);
             if (claim == null) return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "mail is not claimable");
             if (claim.codAmount() > 0L) {
-                WalletBridge.TransferResult payment = wallet == null ? WalletBridge.TransferResult.unavailable()
+                WalletBridge.WalletTransferCallResult payment = wallet == null
+                        ? new WalletBridge.WalletTransferCallResult(false, "DATABASE_ERROR", "Wallet unavailable")
                         : wallet.transferIdempotent(player.getDbID(), claim.senderDbId(), claim.codAmount(),
-                                "OZMail COD " + claim.mailId(), claim.codCurrency(), "mail:cod:" + claim.correlationId());
+                                "OZMail COD " + claim.mailId(), claim.codCurrency(), "OZ - Mail",
+                                "mail:cod:" + claim.correlationId());
                 if (!payment.success()) {
                     database.cancelClaimPayment(claim, player.getDbID(), "COD payment rejected: " + payment.errorCode());
                     return MailSendResult.failed(MailResultCode.PAYMENT_FAILED, payment.message());
@@ -300,10 +304,11 @@ public final class MailService {
             Optional<MailDatabase.CodClaimReconciliation> reconciliation = database.codClaimReconciliation(correlationId);
             if (reconciliation.isEmpty() || reconciliation.get().codAmount() <= 0L) return false;
             MailDatabase.CodClaimReconciliation claim = reconciliation.get();
-            WalletBridge.TransferResult refund = wallet == null ? WalletBridge.TransferResult.unavailable()
+            WalletBridge.WalletTransferCallResult refund = wallet == null
+                    ? new WalletBridge.WalletTransferCallResult(false, "DATABASE_ERROR", "Wallet unavailable")
                     : wallet.transferIdempotent(claim.senderDbId(), claim.recipientDbId(), claim.codAmount(),
                             "OZMail COD refund " + claim.mailId(), claim.codCurrency(),
-                            "mail:cod:refund:" + claim.correlationId());
+                            "OZ - Mail", "mail:cod:refund:" + claim.correlationId());
             if (!refund.success()) return false;
             return database.resolveQuarantinedClaimRefunded(correlationId, admin.getDbID(), reason);
         } catch (SQLException | IllegalArgumentException ex) {
