@@ -206,9 +206,14 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     }
 
     private TableCell tableCell(String text, float width) {
+        return tableCell(text, width, false);
+    }
+
+    private TableCell tableCell(String text, float width, boolean highlighted) {
         UILabel label = new UILabel(text == null ? "" : text);
-        label.setFont(Font.Default);
+        label.setFont(highlighted ? Font.DefaultBold : Font.Default);
         label.setFontSize(13);
+        if (highlighted) label.setFontColor(0xF2C766FF);
         label.setTextWrap(false);
         label.setTextAlign(TextAnchor.MiddleLeft);
         return new TableCell(label, width);
@@ -754,9 +759,14 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         });
         compose.style.width.set(94, Unit.Percent);
         compose.style.height.set(24, Unit.Pixel);
-        return new TableRow(Arrays.asList(tableCell(recipient.name(), 35f),
+        String displayName = recipient.admin()
+                ? recipient.name() + " · " + t().get("MAIL_UI_PLAYERS_ADMIN", uiPlayer)
+                : recipient.name();
+        TableRow row = new TableRow(Arrays.asList(tableCell(displayName, 35f, recipient.admin()),
                 tableCell(formatLastSeen(recipient.lastSeenEpochSeconds()), 25f), new TableCell(favorite, 18f),
                 new TableCell(compose, 22f)));
+        if (recipient.admin()) row.setBackgroundColor(0x3A2D18D8);
+        return row;
     }
 
     private String formatLastSeen(long epochSeconds) {

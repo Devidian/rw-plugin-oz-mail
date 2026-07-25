@@ -97,7 +97,12 @@ class OZMailRuntime extends Plugin {
         Map<Integer, PlayerDatabaseHelper.PlayerRecord> records = PlayerDatabaseHelper.findPlayersByDbIds(this, ids);
         Set<Integer> favorites = new HashSet<>(recipientFavoriteIds(player));
         return records.values().stream().filter(record -> record.name != null && !record.name.isBlank())
-                .map(record -> new Recipient(record.dbId, record.name, record.lastSeenEpochSeconds, favorites.contains(record.dbId)))
+                .map(record -> {
+                    String playerUid = Server.getPlayerUID(record.dbId);
+                    boolean admin = playerUid != null && !playerUid.isBlank() && Server.isPlayerAdmin(playerUid);
+                    return new Recipient(record.dbId, record.name, record.lastSeenEpochSeconds,
+                            favorites.contains(record.dbId), admin);
+                })
                 .sorted(Comparator.comparing(Recipient::favorite).reversed()
                         .thenComparing(Recipient::name, String.CASE_INSENSITIVE_ORDER)).toList();
     }

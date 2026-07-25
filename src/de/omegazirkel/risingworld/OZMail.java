@@ -10,7 +10,11 @@ import net.risingworld.api.events.player.PlayerSpawnEvent;
 public final class OZMail extends OZMailRuntime implements Listener {
     public static final String COMMAND = OZMailRuntime.COMMAND;
 
-    public record Recipient(int dbId, String name, long lastSeenEpochSeconds, boolean favorite) { }
+    public record Recipient(int dbId, String name, long lastSeenEpochSeconds, boolean favorite, boolean admin) {
+        public Recipient(int dbId, String name, long lastSeenEpochSeconds, boolean favorite) {
+            this(dbId, name, lastSeenEpochSeconds, favorite, false);
+        }
+    }
 
     public static OZLogger logger() {
         return OZMailRuntime.logger();

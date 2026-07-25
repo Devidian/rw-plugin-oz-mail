@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.1.10] - 2026-07-26 | Highlighted administrator recipients
+
+- feat: highlight administrators in the recipient table with a labeled gold row
+- fix: resolve administrator status for online and offline recipients through their persistent player identity
+
 ## [0.1.9] - 2026-07-24 | Shared runtime bridges
 
 - refactor: use the synchronized optional Discord bridge
