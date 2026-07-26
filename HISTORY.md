@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [0.1.11] - 2026-07-26 | Concrete item attachments
+
+- fix: persist, label, match, and restore concrete clothing definitions instead of `clothingitem`
+- fix: persist, label, match, and restore concrete construction definitions instead of `constructionitem`
+- fix: preserve custom construction colors across attachment send, claim, return, expiry, and recovery
+- db: add a backward-compatible construction color column to Mail schema v3
+
 ## [0.1.10] - 2026-07-26 | Highlighted administrator recipients
 
 - feat: highlight administrators in the recipient table with a labeled gold row

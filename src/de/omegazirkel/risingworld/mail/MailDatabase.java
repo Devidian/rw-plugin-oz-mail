@@ -16,7 +16,7 @@ import java.util.Optional;
  * while a SQLite transaction is open; their intent/outcome is journaled here.
  */
 public final class MailDatabase {
-    private static final int SCHEMA_VERSION = 2;
+    private static final int SCHEMA_VERSION = 3;
     private final Connection connection;
 
     public MailDatabase(Connection connection) throws SQLException {
@@ -58,6 +58,7 @@ public final class MailDatabase {
                         durability INTEGER NOT NULL DEFAULT 0,
                         item_status INTEGER NOT NULL DEFAULT 0,
                         item_modifier TEXT NOT NULL DEFAULT '',
+                        item_color INTEGER NOT NULL DEFAULT 0,
                         custody_state TEXT NOT NULL,
                         FOREIGN KEY(mail_id) REFERENCES mail_messages(id)
                     )
@@ -65,6 +66,7 @@ public final class MailDatabase {
             ensureColumn(statement, "mail_attachments", "durability", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "mail_attachments", "item_status", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "mail_attachments", "item_modifier", "TEXT NOT NULL DEFAULT ''");
+            ensureColumn(statement, "mail_attachments", "item_color", "INTEGER NOT NULL DEFAULT 0");
             statement.execute("CREATE TABLE IF NOT EXISTS mail_recipient_favorites (owner_db_id INTEGER NOT NULL, "
                     + "recipient_db_id INTEGER NOT NULL, PRIMARY KEY(owner_db_id, recipient_db_id))");
             statement.execute("""
@@ -187,7 +189,8 @@ public final class MailDatabase {
             for (MailAttachment attachment : attachments == null ? List.<MailAttachment>of() : attachments) {
                 try (PreparedStatement insert = connection.prepareStatement("""
                         INSERT INTO mail_attachments(mail_id, item_name, item_variant, amount, checksum, durability,
-                            item_status, item_modifier, custody_state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'RESERVED')
+                            item_status, item_modifier, item_color, custody_state)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'RESERVED')
                         """)) {
                     insert.setString(1, mailId);
                     insert.setString(2, attachment.itemName());
@@ -197,6 +200,7 @@ public final class MailDatabase {
                     insert.setInt(6, attachment.durability());
                     insert.setShort(7, attachment.status());
                     insert.setString(8, attachment.modifier());
+                    insert.setInt(9, attachment.color());
                     insert.executeUpdate();
                 }
             }
@@ -590,7 +594,8 @@ public final class MailDatabase {
     private List<MailAttachment> heldAttachments(String mailId) throws SQLException {
         List<MailAttachment> attachments = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT item_name, item_variant, amount, checksum, durability, item_status, item_modifier FROM mail_attachments
+                SELECT item_name, item_variant, amount, checksum, durability, item_status, item_modifier, item_color
+                FROM mail_attachments
                 WHERE mail_id = ? AND custody_state = 'HELD_IN_MAIL' ORDER BY id ASC
                 """)) {
             statement.setString(1, mailId);
@@ -598,7 +603,8 @@ public final class MailDatabase {
                 while (result.next()) {
                     attachments.add(new MailAttachment(result.getString("item_name"), result.getInt("item_variant"),
                             result.getInt("amount"), result.getString("checksum"), result.getInt("durability"),
-                            result.getShort("item_status"), result.getString("item_modifier")));
+                            result.getShort("item_status"), result.getString("item_modifier"),
+                            result.getInt("item_color")));
                 }
             }
         }
@@ -1064,7 +1070,8 @@ public final class MailDatabase {
     private List<MailAttachment> attachments(String mailId, String custodyState) throws SQLException {
         List<MailAttachment> entries = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT item_name, item_variant, amount, checksum, durability, item_status, item_modifier FROM mail_attachments
+                SELECT item_name, item_variant, amount, checksum, durability, item_status, item_modifier, item_color
+                FROM mail_attachments
                 WHERE mail_id = ? AND custody_state = ? ORDER BY id
                 """)) {
             statement.setString(1, mailId);
@@ -1072,7 +1079,8 @@ public final class MailDatabase {
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) entries.add(new MailAttachment(result.getString("item_name"),
                         result.getInt("item_variant"), result.getInt("amount"), result.getString("checksum"),
-                        result.getInt("durability"), result.getShort("item_status"), result.getString("item_modifier")));
+                        result.getInt("durability"), result.getShort("item_status"), result.getString("item_modifier"),
+                        result.getInt("item_color")));
             }
         }
         return List.copyOf(entries);

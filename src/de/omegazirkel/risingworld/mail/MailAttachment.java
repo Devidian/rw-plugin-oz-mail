@@ -2,10 +2,16 @@ package de.omegazirkel.risingworld.mail;
 
 /** Immutable custody snapshot, including mutable Rising World item state. */
 public record MailAttachment(String itemName, int variant, int amount, String checksum, int durability,
-        short status, String modifier) {
+        short status, String modifier, int color) {
     public MailAttachment(String itemName, int variant, int amount, String checksum) {
-        this(itemName, variant, amount, checksum, 0, (short) 0, "");
+        this(itemName, variant, amount, checksum, 0, (short) 0, "", 0);
     }
+
+    public MailAttachment(String itemName, int variant, int amount, String checksum, int durability,
+            short status, String modifier) {
+        this(itemName, variant, amount, checksum, durability, status, modifier, 0);
+    }
+
     public MailAttachment {
         if (itemName == null || itemName.isBlank()) {
             throw new IllegalArgumentException("itemName is required");

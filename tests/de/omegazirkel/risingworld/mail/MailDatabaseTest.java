@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Statement;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -13,6 +14,64 @@ import java.util.List;
 import org.junit.Test;
 
 public class MailDatabaseTest {
+    @Test
+    public void constructionColorRoundTripsThroughAttachmentPersistence() throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
+            MailDatabase database = new MailDatabase(connection);
+            MailAttachment attachment = new MailAttachment("block", 7, 3, "block:7:0:0::1223476",
+                    0, (short) 0, "", 0x12AB34);
+            MailDatabase.PreparedMail prepared = database.prepareOutgoingMail(11, "Sender", 22, "Recipient",
+                    "Subject", "Body", List.of(attachment), 0L, "", "");
+            assertTrue(database.completeSend(prepared, 11));
+
+            MailAttachment persisted = database.findInboxMail(22, prepared.mailId()).orElseThrow()
+                    .attachments().get(0);
+            assertEquals(0x12AB34, persisted.color());
+        }
+    }
+
+    @Test
+    public void legacyAttachmentConstructorDefaultsToUncolored() {
+        assertEquals(0, new MailAttachment("block", 7, 3, "block:7:3", 0, (short) 0, "").color());
+    }
+
+    @Test
+    public void schemaV2AttachmentRowsMigrateToDefaultColor() throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
+                Statement statement = connection.createStatement()) {
+            statement.execute("""
+                    CREATE TABLE mail_attachments (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        mail_id TEXT NOT NULL,
+                        item_name TEXT NOT NULL,
+                        item_variant INTEGER NOT NULL,
+                        amount INTEGER NOT NULL,
+                        checksum TEXT NOT NULL,
+                        durability INTEGER NOT NULL DEFAULT 0,
+                        item_status INTEGER NOT NULL DEFAULT 0,
+                        item_modifier TEXT NOT NULL DEFAULT '',
+                        custody_state TEXT NOT NULL
+                    )
+                    """);
+            statement.execute("""
+                    INSERT INTO mail_attachments(
+                        mail_id, item_name, item_variant, amount, checksum, custody_state)
+                    VALUES ('legacy-mail', 'block', 7, 3, 'block:7:3', 'HELD_IN_MAIL')
+                    """);
+
+            new MailDatabase(connection);
+
+            try (var result = statement.executeQuery(
+                    "SELECT item_color FROM mail_attachments WHERE mail_id = 'legacy-mail'")) {
+                assertTrue(result.next());
+                assertEquals(0, result.getInt("item_color"));
+            }
+            try (var result = statement.executeQuery("PRAGMA user_version")) {
+                assertEquals(3, result.getInt(1));
+            }
+        }
+    }
+
     @Test
     public void completedSendCreatesInboxAndCompletedOperation() throws Exception {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
