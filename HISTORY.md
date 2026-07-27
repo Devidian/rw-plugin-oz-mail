@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [0.1.12] - 2026-07-27 | Trusted Marketplace attachments
+
+- feat: add trusted, idempotent plugin attachment delivery for Marketplace wanted listings
+- feat: expose a mailbox-capacity probe before external inventory custody changes
+- change: trust the canonical `OZ - Marketplace` sender by default
+
 ## [0.1.11] - 2026-07-26 | Concrete item attachments
 
 - fix: persist, label, match, and restore concrete clothing definitions instead of `clothingitem`

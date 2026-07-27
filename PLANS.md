@@ -14,3 +14,9 @@ Active implementation work is tracked in [docs/active/](docs/active/).
 - [x] Match and restore construction attachments through the construction inventory API
 - [x] Preserve construction colors as part of durable attachment custody
 - [x] Document compatibility and rollback limits for existing generic construction attachments
+
+## Trusted Marketplace attachments
+
+- [x] Add API v2 capacity and attachment endpoints
+- [x] Preserve correlation-id idempotency and trusted-sender validation
+- [x] Complete development-server Marketplace delivery acceptance

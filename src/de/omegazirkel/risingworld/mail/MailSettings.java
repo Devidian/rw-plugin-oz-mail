@@ -118,7 +118,7 @@ public final class MailSettings {
                 entry("extraMailboxPriceIncreaseFactor", "Preisfaktor / Price increase factor",
                         "Multiplikator je bereits gekauftem Extra-Postfach; 1 bedeutet kein Anstieg. / Multiplier per purchased extra mailbox; 1 means no increase.", AdminSettingsType.STRING),
                 AdminSettingsEntry.group("bridge", "Plugin-Bridge / Plugin bridge",
-                        "Vertrauensgrenze für reine Plugin-Mails. / Trust boundary for text-only plugin mail."),
+                        "Vertrauensgrenze für Plugin-Mails und Anhänge. / Trust boundary for plugin mail and attachments."),
                 entry("trustedPluginSenders", "Vertrauenswürdige Sender / Trusted senders",
                         "Kommagetrennte Plugin-Namen. / Comma-separated plugin names.", AdminSettingsType.STRING));
     }

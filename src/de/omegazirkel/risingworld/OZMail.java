@@ -1,6 +1,7 @@
 package de.omegazirkel.risingworld;
 
 import de.omegazirkel.risingworld.tools.OZLogger;
+import de.omegazirkel.risingworld.mail.MailService;
 import net.risingworld.api.events.EventMethod;
 import net.risingworld.api.events.Listener;
 import net.risingworld.api.events.player.PlayerCommandEvent;
@@ -18,6 +19,28 @@ public final class OZMail extends OZMailRuntime implements Listener {
 
     public static OZLogger logger() {
         return OZMailRuntime.logger();
+    }
+
+    /** Thin public compatibility facade used by the reflection-only Tools bridge. */
+    @Override
+    public MailService.MailSendResult sendPluginMail(String senderPlugin, int recipientDbId, String recipientName,
+            String subject, String body, String callerCorrelationId) {
+        return super.sendPluginMail(senderPlugin, recipientDbId, recipientName, subject, body, callerCorrelationId);
+    }
+
+    /** Thin public compatibility facade used by the reflection-only Tools bridge. */
+    @Override
+    public boolean canReceivePluginMail(int recipientDbId) {
+        return super.canReceivePluginMail(recipientDbId);
+    }
+
+    /** Thin public compatibility facade used by the reflection-only Tools bridge. */
+    @Override
+    public MailService.MailSendResult sendPluginMailWithAttachments(String senderPlugin, int recipientDbId,
+            String recipientName, String subject, String body, String callerCorrelationId, String[] itemNames,
+            int[] variants, int[] amounts, int[] durabilities, short[] statuses, String[] modifiers, int[] colors) {
+        return super.sendPluginMailWithAttachments(senderPlugin, recipientDbId, recipientName, subject, body,
+                callerCorrelationId, itemNames, variants, amounts, durabilities, statuses, modifiers, colors);
     }
 
     @Override

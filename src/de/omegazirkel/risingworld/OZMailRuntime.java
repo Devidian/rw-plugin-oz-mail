@@ -303,6 +303,39 @@ class OZMailRuntime extends Plugin {
                 callerCorrelationId);
     }
 
+    public boolean canReceivePluginMail(int recipientDbId) {
+        return mailService != null && mailService.canReceivePluginMail(recipientDbId);
+    }
+
+    public MailService.MailSendResult sendPluginMailWithAttachments(String senderPlugin, int recipientDbId,
+            String recipientName, String subject, String body, String callerCorrelationId, String[] itemNames,
+            int[] variants, int[] amounts, int[] durabilities, short[] statuses, String[] modifiers, int[] colors) {
+        if (mailService == null) {
+            return MailService.MailSendResult.failed(MailResultCode.DATABASE_UNAVAILABLE,
+                    "OZMail database is unavailable");
+        }
+        int count = itemNames == null ? -1 : itemNames.length;
+        if (count <= 0 || variants == null || variants.length != count || amounts == null || amounts.length != count
+                || durabilities == null || durabilities.length != count || statuses == null || statuses.length != count
+                || modifiers == null || modifiers.length != count || colors == null || colors.length != count) {
+            return MailService.MailSendResult.failed(MailResultCode.INVALID_REQUEST,
+                    "attachment arrays must be non-empty and have equal lengths");
+        }
+        try {
+            java.util.ArrayList<MailAttachment> attachments = new java.util.ArrayList<>(count);
+            for (int i = 0; i < count; i++) {
+                String checksum = itemNames[i] + ':' + variants[i] + ':' + amounts[i] + ':' + durabilities[i] + ':'
+                        + statuses[i] + ':' + (modifiers[i] == null ? "" : modifiers[i]) + ':' + colors[i];
+                attachments.add(new MailAttachment(itemNames[i], variants[i], amounts[i], checksum, durabilities[i],
+                        statuses[i], modifiers[i], colors[i]));
+            }
+            return mailService.sendPluginMail(senderPlugin, recipientDbId, recipientName, subject, body, attachments,
+                    callerCorrelationId);
+        } catch (IllegalArgumentException ex) {
+            return MailService.MailSendResult.failed(MailResultCode.INVALID_REQUEST, ex.getMessage());
+        }
+    }
+
     @Override
     public void onDisable() {
         String pluginName = getDescription("name");

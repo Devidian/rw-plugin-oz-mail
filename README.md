@@ -8,13 +8,15 @@ Item custody and COD are introduced only with durable recovery support.
 
 ## Plugin mail bridge
 
-`de.omegazirkel.risingworld.mail.MailBridge` provides API version 1 for
-text-only plugin-originated mail. Consumers must use a stable correlation ID;
+The shared OZ Tools `MailBridge` provides API version 2 for text and trusted
+plugin-originated attachments. Consumers must use a stable correlation ID;
 repeated requests with the same ID return the original completed result.
 The operator must explicitly list each sender plugin in
-`trustedPluginSenders` in `settings.properties`. Attachments and COD are not
-accepted through this bridge. The request sender name must match the consumer
-plugin's own `plugin.yml` name; the bridge rejects caller-supplied aliases.
+`trustedPluginSenders` in `settings.properties`; `OZ - Marketplace` is present
+in the default settings. Attachment callers transfer already-owned custody to
+Mail and may probe mailbox capacity before changing external inventory. COD is
+not accepted through this bridge. The request sender name must match the
+consumer plugin's own `plugin.yml` name.
 
 ## Operational limits
 

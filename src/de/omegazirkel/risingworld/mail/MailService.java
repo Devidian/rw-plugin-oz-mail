@@ -87,6 +87,15 @@ public final class MailService {
         }
     }
 
+    public boolean canReceivePluginMail(int recipientDbId) {
+        if (recipientDbId <= 0) return false;
+        try {
+            return database.activeMailboxCount(recipientDbId) < mailboxCapacity(recipientDbId);
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
+
     public int unreadCount(Player player) {
         if (player == null || player.getDbID() <= 0) return 0;
         try {
@@ -342,13 +351,19 @@ public final class MailService {
     /** Trusted plugin-originated mail has no player inventory boundary. */
     public MailSendResult sendPluginMail(String senderPlugin, int recipientDbId, String recipientName, String subject,
             String body, String callerCorrelationId) {
+        return sendPluginMail(senderPlugin, recipientDbId, recipientName, subject, body, List.of(),
+                callerCorrelationId);
+    }
+
+    public MailSendResult sendPluginMail(String senderPlugin, int recipientDbId, String recipientName, String subject,
+            String body, List<MailAttachment> attachments, String callerCorrelationId) {
         if (senderPlugin == null || senderPlugin.isBlank() || recipientDbId <= 0) {
             return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "plugin sender and recipient database id are required");
         }
         if (!settings.isTrustedPluginSender(senderPlugin)) {
             return MailSendResult.failed(MailResultCode.PLUGIN_NOT_TRUSTED, "plugin sender is not trusted");
         }
-        MailSendResult validation = validate(recipientDbId, subject, body, List.of(), 0L);
+        MailSendResult validation = validate(recipientDbId, subject, body, attachments, 0L);
         if (validation != null) return validation;
         try {
             String correlationId = callerCorrelationId == null || callerCorrelationId.isBlank() ? ""
@@ -364,11 +379,11 @@ public final class MailService {
                             "existing plugin mail operation is not complete");
                 }
             }
-            if (database.activeMailboxCount(recipientDbId) >= settings.mailboxLimit) {
+            if (database.activeMailboxCount(recipientDbId) >= mailboxCapacity(recipientDbId)) {
                 return MailSendResult.failed(MailResultCode.MAILBOX_FULL, "recipient mailbox limit reached");
             }
             MailDatabase.PreparedMail prepared = database.prepareOutgoingMail(0, senderPlugin, recipientDbId,
-                    recipientName, subject, body, List.of(), 0L, "", senderPlugin, correlationId);
+                    recipientName, subject, body, attachments, 0L, "", senderPlugin, correlationId);
             if (!database.completeSend(prepared, 0)) {
                 database.quarantineSend(prepared, 0, "Plugin mail state changed while completing send");
                 return MailSendResult.quarantined(prepared.mailId(), prepared.correlationId(),
