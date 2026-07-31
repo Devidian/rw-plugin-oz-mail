@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [0.1.13] - 2026-07-31 | Clearer mail feedback
+
+- feat: let players enable or disable the mail-send success confirmation
+- fix: show localized success and error message boxes after sending mail
+- fix: warn players at login when their mailbox is full
+
 ## [0.1.12] - 2026-07-27 | Trusted Marketplace attachments
 
 - feat: add trusted, idempotent plugin attachment delivery for Marketplace wanted listings

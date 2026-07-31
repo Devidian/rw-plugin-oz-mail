@@ -820,8 +820,15 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
                             List.copyOf(selectedAttachments.values()), codAmount, currency);
                     setStatus("MAIL_RESULT_" + result.code().name());
                     if (result.success()) {
+                        if (MailPlayerPreferences.sendConfirmationEnabled(uiPlayer)) {
+                            uiPlayer.showSuccessMessageBox(t().get("MAIL_UI_TITLE", uiPlayer),
+                                    t().get("MAIL_RESULT_SUCCESS", uiPlayer));
+                        }
                         resetComposeDraft();
                         rebuild();
+                    } else {
+                        uiPlayer.showErrorMessageBox(t().get("MAIL_UI_TITLE", uiPlayer),
+                                t().get("MAIL_RESULT_" + result.code().name(), uiPlayer));
                     }
                 })));
     }

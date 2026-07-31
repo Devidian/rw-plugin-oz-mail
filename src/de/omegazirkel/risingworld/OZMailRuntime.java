@@ -373,6 +373,10 @@ class OZMailRuntime extends Plugin {
 
     public void onPlayerSpawn(PlayerSpawnEvent event) {
         Player player = event.getPlayer();
+        if (mailService != null && mailboxUsage(player) >= mailboxCapacity(player)) {
+            player.showWarningMessageBox(getDescription("name"),
+                    translations.get("MAIL_WARNING_MAILBOX_FULL", player));
+        }
         if (settings != null && settings.enableWelcomeMessage) {
             player.sendTextMessage(translations.get("MAIL_WELCOME", player));
         }

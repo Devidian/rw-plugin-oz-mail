@@ -8,6 +8,7 @@ import net.risingworld.api.objects.Player;
 /** Player-owned mail preferences live in the shared OZTools settings store. */
 public final class MailPlayerPreferences {
     private static final String ANNOUNCEMENTS_KEY = "ozmail.announcements.enabled";
+    private static final String SEND_CONFIRMATION_KEY = "ozmail.send-confirmation.enabled";
     private static final String RECIPIENT_WINDOW_DAYS_KEY = "ozmail.recipients.window-days";
 
     private MailPlayerPreferences() { }
@@ -26,6 +27,16 @@ public final class MailPlayerPreferences {
     public static void setAnnouncementsEnabled(Player player, boolean enabled) {
         PlayerSettings store = OZTools.playerSettings();
         if (player != null && store != null) store.setBoolean(player.getDbID(), ANNOUNCEMENTS_KEY, enabled);
+    }
+
+    public static boolean sendConfirmationEnabled(Player player) {
+        PlayerSettings store = OZTools.playerSettings();
+        return player == null || store == null || store.getBoolean(player.getDbID(), SEND_CONFIRMATION_KEY).orElse(true);
+    }
+
+    public static void setSendConfirmationEnabled(Player player, boolean enabled) {
+        PlayerSettings store = OZTools.playerSettings();
+        if (player != null && store != null) store.setBoolean(player.getDbID(), SEND_CONFIRMATION_KEY, enabled);
     }
 
     public static int recipientWindowDays(Player player, int defaultDays) {

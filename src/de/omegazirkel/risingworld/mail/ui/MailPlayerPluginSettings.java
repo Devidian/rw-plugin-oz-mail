@@ -31,6 +31,14 @@ public final class MailPlayerPluginSettings extends PlayerPluginSettings {
                     redrawContent();
                 }));
                 flexWrapper.addChild(announcements);
+                OZUIElement sendConfirmation = defaultSettingsContainer();
+                sendConfirmation.addChild(defaultSettingsLabel(plugin.text("MAIL_SETTINGS_SEND_CONFIRMATION", player)));
+                sendConfirmation.addChild(switchButtons(player, MailPlayerPreferences.sendConfirmationEnabled(player), event -> {
+                    MailPlayerPreferences.setSendConfirmationEnabled(player,
+                            !MailPlayerPreferences.sendConfirmationEnabled(player));
+                    redrawContent();
+                }));
+                flexWrapper.addChild(sendConfirmation);
                 flexWrapper.addChild(recipientWindowSetting(player));
             }
 
