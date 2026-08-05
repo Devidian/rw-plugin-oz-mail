@@ -1,6 +1,9 @@
 # History
 
-## Unreleased
+## [0.1.14] - 2026-08-05 | Trusted plugin senders
+
+- change: trust all canonical OZ plugin senders in the default configuration
+- fix: show the trusted-plugin sender list in a tall multiline settings field
 
 ## [0.1.13] - 2026-07-31 | Clearer mail feedback
 

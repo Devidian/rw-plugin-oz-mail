@@ -120,7 +120,7 @@ public final class MailSettings {
                 AdminSettingsEntry.group("bridge", "Plugin-Bridge / Plugin bridge",
                         "Vertrauensgrenze für Plugin-Mails und Anhänge. / Trust boundary for plugin mail and attachments."),
                 entry("trustedPluginSenders", "Vertrauenswürdige Sender / Trusted senders",
-                        "Kommagetrennte Plugin-Namen. / Comma-separated plugin names.", AdminSettingsType.STRING));
+                        "Kommagetrennte Plugin-Namen. / Comma-separated plugin names.", AdminSettingsType.TEXT));
     }
 
     private AdminSettingsEntry entry(String key, String label, String description, AdminSettingsType type) {

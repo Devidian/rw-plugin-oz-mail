@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import de.omegazirkel.risingworld.tools.settings.AdminSettingsType;
 import net.risingworld.api.Plugin;
 
 public class MailServicePluginAttachmentTest {
@@ -45,6 +46,20 @@ public class MailServicePluginAttachmentTest {
             assertEquals(1, delivered.attachments().size());
             assertEquals(2, delivered.attachments().get(0).amount());
         }
+    }
+
+    @Test
+    public void trustedPluginSendersUseMultilineAdminField() throws Exception {
+        Path pluginDirectory = Files.createTempDirectory("oz-mail-settings-test");
+        Files.writeString(pluginDirectory.resolve("settings.properties"),
+                "trustedPluginSenders=OZ - Land Claim,OZ - Marketplace\n");
+        Files.writeString(pluginDirectory.resolve("settings.default.properties"),
+                "trustedPluginSenders=OZ - Land Claim,OZ - Marketplace\n");
+
+        MailSettings settings = MailSettings.load(new TestPlugin(pluginDirectory));
+        assertEquals(AdminSettingsType.TEXT, settings.adminSettingsEntries().stream()
+                .filter(entry -> "trustedPluginSenders".equals(entry.getKey()))
+                .findFirst().orElseThrow().getType());
     }
 
     private static final class TestPlugin extends Plugin {
