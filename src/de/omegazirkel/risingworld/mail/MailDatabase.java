@@ -16,7 +16,7 @@ import java.util.Optional;
  * while a SQLite transaction is open; their intent/outcome is journaled here.
  */
 public final class MailDatabase {
-    private static final int SCHEMA_VERSION = 3;
+    private static final int SCHEMA_VERSION = 4;
     private final Connection connection;
 
     public MailDatabase(Connection connection) throws SQLException {
@@ -44,7 +44,8 @@ public final class MailDatabase {
                         created_at BIGINT NOT NULL,
                         delivered_at BIGINT NOT NULL DEFAULT 0,
                         read_at BIGINT NOT NULL DEFAULT 0,
-                        archived_at BIGINT NOT NULL DEFAULT 0
+                        archived_at BIGINT NOT NULL DEFAULT 0,
+                        quota_exempt INTEGER NOT NULL DEFAULT 0
                     )
                     """);
             statement.execute("""
@@ -67,6 +68,7 @@ public final class MailDatabase {
             ensureColumn(statement, "mail_attachments", "item_status", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "mail_attachments", "item_modifier", "TEXT NOT NULL DEFAULT ''");
             ensureColumn(statement, "mail_attachments", "item_color", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "mail_messages", "quota_exempt", "INTEGER NOT NULL DEFAULT 0");
             statement.execute("CREATE TABLE IF NOT EXISTS mail_recipient_favorites (owner_db_id INTEGER NOT NULL, "
                     + "recipient_db_id INTEGER NOT NULL, PRIMARY KEY(owner_db_id, recipient_db_id))");
             statement.execute("""
@@ -157,6 +159,14 @@ public final class MailDatabase {
     public PreparedMail prepareOutgoingMail(int senderDbId, String senderName, int recipientDbId, String recipientName,
             String subject, String body, List<MailAttachment> attachments, long codAmount, String codCurrency,
             String senderPlugin, String requestedCorrelationId) throws SQLException {
+        return prepareOutgoingMail(senderDbId, senderName, recipientDbId, recipientName, subject, body, attachments,
+                codAmount, codCurrency, senderPlugin, requestedCorrelationId, false);
+    }
+
+    /** Operator reports remain visible but never consume player mailbox capacity. */
+    public PreparedMail prepareOutgoingMail(int senderDbId, String senderName, int recipientDbId, String recipientName,
+            String subject, String body, List<MailAttachment> attachments, long codAmount, String codCurrency,
+            String senderPlugin, String requestedCorrelationId, boolean quotaExempt) throws SQLException {
         if (senderDbId < 0 || recipientDbId <= 0 || subject == null || body == null || codAmount < 0) {
             throw new IllegalArgumentException("invalid outgoing mail");
         }
@@ -169,8 +179,8 @@ public final class MailDatabase {
         try {
             try (PreparedStatement message = connection.prepareStatement("""
                     INSERT INTO mail_messages(id, sender_db_id, sender_name, sender_plugin, recipient_db_id,
-                        recipient_name, subject, body, state, cod_amount, cod_currency, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        recipient_name, subject, body, state, cod_amount, cod_currency, created_at, quota_exempt)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """)) {
                 message.setString(1, mailId);
                 message.setInt(2, senderDbId);
@@ -184,6 +194,7 @@ public final class MailDatabase {
                 message.setLong(10, codAmount);
                 message.setString(11, safe(codCurrency));
                 message.setLong(12, now);
+                message.setInt(13, quotaExempt ? 1 : 0);
                 message.executeUpdate();
             }
             for (MailAttachment attachment : attachments == null ? List.<MailAttachment>of() : attachments) {
@@ -423,7 +434,7 @@ public final class MailDatabase {
     public int activeMailboxCount(int recipientDbId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT COUNT(*) FROM mail_messages
-                WHERE recipient_db_id = ? AND state NOT IN (?, ?)
+                WHERE recipient_db_id = ? AND quota_exempt = 0 AND state NOT IN (?, ?)
                 """)) {
             statement.setInt(1, recipientDbId);
             statement.setString(2, MailMessageState.DELETED.name());

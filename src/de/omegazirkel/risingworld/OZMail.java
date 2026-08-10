@@ -30,6 +30,14 @@ public final class OZMail extends OZMailRuntime implements Listener {
 
     /** Thin public compatibility facade used by the reflection-only Tools bridge. */
     @Override
+    public MailService.MailSendResult sendPluginSystemReport(String senderPlugin, int recipientDbId,
+            String recipientName, String subject, String body, String callerCorrelationId) {
+        return super.sendPluginSystemReport(senderPlugin, recipientDbId, recipientName, subject, body,
+                callerCorrelationId);
+    }
+
+    /** Thin public compatibility facade used by the reflection-only Tools bridge. */
+    @Override
     public boolean canReceivePluginMail(int recipientDbId) {
         return super.canReceivePluginMail(recipientDbId);
     }

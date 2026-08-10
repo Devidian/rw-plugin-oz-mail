@@ -352,11 +352,28 @@ public final class MailService {
     public MailSendResult sendPluginMail(String senderPlugin, int recipientDbId, String recipientName, String subject,
             String body, String callerCorrelationId) {
         return sendPluginMail(senderPlugin, recipientDbId, recipientName, subject, body, List.of(),
-                callerCorrelationId);
+                callerCorrelationId, false);
+    }
+
+    /**
+     * Delivers a trusted operational report without consuming recipient mailbox
+     * capacity. This is deliberately separate from normal plugin mail so
+     * player-facing integrations retain their quota semantics.
+     */
+    public MailSendResult sendPluginSystemReport(String senderPlugin, int recipientDbId, String recipientName,
+            String subject, String body, String callerCorrelationId) {
+        return sendPluginMail(senderPlugin, recipientDbId, recipientName, subject, body, List.of(),
+                callerCorrelationId, true);
     }
 
     public MailSendResult sendPluginMail(String senderPlugin, int recipientDbId, String recipientName, String subject,
             String body, List<MailAttachment> attachments, String callerCorrelationId) {
+        return sendPluginMail(senderPlugin, recipientDbId, recipientName, subject, body, attachments,
+                callerCorrelationId, false);
+    }
+
+    private MailSendResult sendPluginMail(String senderPlugin, int recipientDbId, String recipientName, String subject,
+            String body, List<MailAttachment> attachments, String callerCorrelationId, boolean quotaExempt) {
         if (senderPlugin == null || senderPlugin.isBlank() || recipientDbId <= 0) {
             return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "plugin sender and recipient database id are required");
         }
@@ -379,11 +396,11 @@ public final class MailService {
                             "existing plugin mail operation is not complete");
                 }
             }
-            if (database.activeMailboxCount(recipientDbId) >= mailboxCapacity(recipientDbId)) {
+            if (!quotaExempt && database.activeMailboxCount(recipientDbId) >= mailboxCapacity(recipientDbId)) {
                 return MailSendResult.failed(MailResultCode.MAILBOX_FULL, "recipient mailbox limit reached");
             }
             MailDatabase.PreparedMail prepared = database.prepareOutgoingMail(0, senderPlugin, recipientDbId,
-                    recipientName, subject, body, attachments, 0L, "", senderPlugin, correlationId);
+                    recipientName, subject, body, attachments, 0L, "", senderPlugin, correlationId, quotaExempt);
             if (!database.completeSend(prepared, 0)) {
                 database.quarantineSend(prepared, 0, "Plugin mail state changed while completing send");
                 return MailSendResult.quarantined(prepared.mailId(), prepared.correlationId(),

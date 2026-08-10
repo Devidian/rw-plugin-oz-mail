@@ -1,5 +1,10 @@
 # History
 
+## [0.1.15] - 2026-08-10 | System reports
+
+- feat: deliver trusted system reports without consuming mailbox capacity or triggering a mailbox-full warning.
+- fix: show the normal online-delivery notification for trusted quota-exempt system reports.
+
 ## [0.1.14] - 2026-08-05 | Trusted plugin senders
 
 - change: trust all canonical OZ plugin senders in the default configuration

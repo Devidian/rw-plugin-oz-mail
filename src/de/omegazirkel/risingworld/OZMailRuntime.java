@@ -303,6 +303,19 @@ class OZMailRuntime extends Plugin {
                 callerCorrelationId);
     }
 
+    /** Public runtime API for trusted quota-exempt operational reports. */
+    public MailService.MailSendResult sendPluginSystemReport(String senderPlugin, int recipientDbId,
+            String recipientName, String subject, String body, String callerCorrelationId) {
+        if (mailService == null) {
+            return MailService.MailSendResult.failed(MailResultCode.DATABASE_UNAVAILABLE,
+                    "OZMail database is unavailable");
+        }
+        MailService.MailSendResult result = mailService.sendPluginSystemReport(senderPlugin, recipientDbId,
+                recipientName, subject, body, callerCorrelationId);
+        notifyOnlineRecipient(recipientDbId, result);
+        return result;
+    }
+
     public boolean canReceivePluginMail(int recipientDbId) {
         return mailService != null && mailService.canReceivePluginMail(recipientDbId);
     }

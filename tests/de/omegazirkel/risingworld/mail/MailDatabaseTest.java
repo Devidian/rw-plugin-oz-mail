@@ -67,7 +67,7 @@ public class MailDatabaseTest {
                 assertEquals(0, result.getInt("item_color"));
             }
             try (var result = statement.executeQuery("PRAGMA user_version")) {
-                assertEquals(3, result.getInt(1));
+                assertEquals(4, result.getInt(1));
             }
         }
     }
@@ -86,6 +86,22 @@ public class MailDatabaseTest {
             assertEquals(MailMessageState.DELIVERED.name(), outcome.mailState());
             assertEquals(prepared.mailId(), database.findMailIdByReference(prepared.mailId()).orElseThrow());
             assertEquals(prepared.mailId(), database.findMailIdByReference(prepared.correlationId()).orElseThrow());
+        }
+    }
+
+    @Test
+    public void quotaExemptReportRemainsVisibleWithoutUsingMailboxCapacity() throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
+            MailDatabase database = new MailDatabase(connection);
+            MailDatabase.PreparedMail normal = database.prepareOutgoingMail(11, "Sender", 22, "Recipient",
+                    "Normal", "Body", List.of(), 0L, "", "");
+            MailDatabase.PreparedMail report = database.prepareOutgoingMail(0, "OZ - Shop", 22, "Recipient",
+                    "Report", "Body", List.of(), 0L, "", "OZ - Shop", "report:1", true);
+
+            assertTrue(database.completeSend(normal, 11));
+            assertTrue(database.completeSend(report, 0));
+            assertEquals(1, database.activeMailboxCount(22));
+            assertEquals(2, database.listInbox(22, 20).size());
         }
     }
 
