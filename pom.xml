@@ -21,12 +21,12 @@
         <dependency>
             <groupId>com.github.devidian</groupId>
             <artifactId>rw-plugin-oz-tools</artifactId>
-            <version>0.23.12</version>
+            <version> 0.23.14</version>
         </dependency>
         <dependency>
             <groupId>net.risingworld</groupId>
             <artifactId>PluginAPI</artifactId>
-            <version>0.9.2</version>
+            <version>0.9.3</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -66,7 +66,7 @@
                 <artifactId>maven-install-plugin</artifactId>
                 <version>3.1.1</version>
                 <executions><execution><id>install-plugin-api</id><phase>validate</phase><goals><goal>install-file</goal></goals><configuration>
-                    <file>${basedir}/libs/PluginAPI.jar</file><groupId>net.risingworld</groupId><artifactId>PluginAPI</artifactId><version>0.9.2</version><packaging>jar</packaging>
+                    <file>${basedir}/libs/PluginAPI.jar</file><groupId>net.risingworld</groupId><artifactId>PluginAPI</artifactId><version>0.9.3</version><packaging>jar</packaging>
                 </configuration></execution></executions>
             </plugin>
             <plugin>
@@ -88,8 +88,10 @@
                 <version>3.3.1</version>
                 <executions>
                     <execution><id>copy-assets</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}/assets</outputDirectory><resources><resource><directory>${basedir}/src/assets</directory><includes><include>**/*</include></includes></resource></resources></configuration></execution>
-                    <execution><id>copy-settings</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}</outputDirectory><resources><resource><directory>${basedir}/src</directory><includes><include>*.properties</include></includes></resource></resources></configuration></execution>
-                    <execution><id>copy-i18n</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}/i18n</outputDirectory><resources><resource><directory>${basedir}/src/i18n</directory><includes><include>*.properties</include></includes></resource></resources></configuration></execution>
+                    <execution><id>copy-settings</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}</outputDirectory><resources><resource><directory>${basedir}/src</directory><includes><include>*.json</include>
+                                        <include>*.properties</include></includes></resource></resources></configuration></execution>
+                    <execution><id>copy-i18n</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}/i18n</outputDirectory><resources><resource><directory>${basedir}/src/i18n</directory><includes><include>*.json</include>
+                                        <include>*.properties</include></includes></resource></resources></configuration></execution>
                     <execution><id>copy-docs</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}</outputDirectory><resources><resource><directory>${basedir}</directory><includes><include>README.md</include><include>HISTORY.md</include></includes></resource></resources></configuration></execution>
                 </executions>
             </plugin>

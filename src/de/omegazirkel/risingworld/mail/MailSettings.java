@@ -15,6 +15,7 @@ import java.util.HashSet;
 
 import de.omegazirkel.risingworld.tools.settings.AdminSettingsEntry;
 import de.omegazirkel.risingworld.tools.settings.AdminSettingsType;
+import de.omegazirkel.risingworld.tools.settings.JsonSettingsFile;
 import de.omegazirkel.risingworld.tools.settings.SettingsFileEditor;
 import net.risingworld.api.Plugin;
 
@@ -68,11 +69,14 @@ public final class MailSettings {
     }
 
     public static MailSettings load(Plugin plugin) throws IOException {
-        Path settings = Paths.get((plugin.getPath() == null ? "." : plugin.getPath()) + "/settings.properties");
-        Path defaults = settings.resolveSibling("settings.default.properties");
-        if (Files.notExists(settings) && Files.exists(defaults)) {
-            Files.copy(defaults, settings);
-        }
+        Path settings = JsonSettingsFile.worldSettingsFile(plugin.getPath() == null ? "." : plugin.getPath());
+        Path defaults = settings.resolveSibling("settings.default.json");
+        Path legacy = settings.resolveSibling("settings.properties");
+        JsonSettingsFile.migrateLegacyProperties(legacy, settings);
+        if (Files.notExists(settings) && Files.exists(defaults))
+            JsonSettingsFile.copyAtomically(defaults, settings);
+        JsonSettingsFile.normalizePaths(settings);
+        JsonSettingsFile.migrateCsvToArray(settings, "general.trustedPluginSenders");
         return new MailSettings(settings, defaults, read(settings), read(defaults));
     }
 
@@ -127,7 +131,7 @@ public final class MailSettings {
         return new AdminSettingsEntry(key, label, description,
                 currentSettings.getProperty(key, defaultSettings.getProperty(key, "")),
                 defaultSettings.getProperty(key, ""), type, false, value -> {
-                    if (!SettingsFileEditor.writeValue(settingsFile, key, value)) return false;
+                    if (!SettingsFileEditor.writeValue(settingsFile, JsonSettingsFile.canonicalPath(key), value)) return false;
                     try {
                         reload();
                         return true;
@@ -138,6 +142,11 @@ public final class MailSettings {
     }
 
     private static Properties read(Path path) throws IOException {
+        if (!path.getFileName().toString().endsWith(".properties")) {
+            Properties properties = JsonSettingsFile.loadProperties(path);
+            JsonSettingsFile.addCompatibilityAliases(properties);
+            return properties;
+        }
         Properties properties = new Properties();
         if (Files.exists(path)) {
             try (FileInputStream input = new FileInputStream(path.toFile())) {

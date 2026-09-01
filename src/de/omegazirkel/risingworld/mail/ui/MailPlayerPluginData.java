@@ -30,7 +30,7 @@ public final class MailPlayerPluginData extends PlayerPluginData {
                 overview.setBackgroundColor(0x181713D8);
                 overview.setBorder(1);
                 overview.setBorderColor(0x7A5D2AFF);
-                UILabel label = new UILabel(plugin.text("MAIL_DATA_OVERVIEW", player)
+                UILabel label = new UILabel(plugin.text("mail.data.overview", player)
                         .replace("PH_INBOX", String.valueOf(plugin.inbox(player).size()))
                         .replace("PH_OUTBOX", String.valueOf(plugin.outbox(player).size()))
                         .replace("PH_ARCHIVE", String.valueOf(plugin.archive(player).size()))

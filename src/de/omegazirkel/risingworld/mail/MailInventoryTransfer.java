@@ -31,7 +31,7 @@ public final class MailInventoryTransfer {
             if (item == null || !item.isValid() || item.getStack() <= 0) continue;
             String itemName = storedName(item);
             if (itemName.isBlank()) continue;
-            AttachmentCandidate candidate = snapshot(itemName, item);
+            AttachmentCandidate candidate = snapshot(itemName, item, player.getLanguage());
             String key = key(candidate.itemName(), candidate.variant(), candidate.durability(), candidate.status(),
                     candidate.modifier(), candidate.color());
             AttachmentCandidate prior = grouped.get(key);
@@ -126,8 +126,12 @@ public final class MailInventoryTransfer {
         return List.copyOf(grouped.values());
     }
 
-    private static AttachmentCandidate snapshot(String itemName, Item item) {
-        return new AttachmentCandidate(itemName, MailItemNames.label(itemName, item.getVariant()), item.getVariant(), item.getStack(),
+    private static AttachmentCandidate snapshot(String itemName, Item item, String language) {
+        String localizedName = item.getLocalizedName(language);
+        String displayName = localizedName == null || localizedName.isBlank()
+                ? MailItemNames.label(itemName, item.getVariant())
+                : localizedName.trim();
+        return new AttachmentCandidate(itemName, displayName, item.getVariant(), item.getStack(),
                 item.getDurability(), item.getStatus(), modifierName(item), constructionColor(item));
     }
 

@@ -186,7 +186,7 @@ class OZMailRuntime extends Plugin {
         boolean resolved = mailService != null && mailService.resolveQuarantinedSend(admin, correlationId, outcome, reason);
         if (resolved && settings != null && settings.discordAuditChannelId > 0L) {
             String key = outcome == MailDatabase.VerifiedSendOutcome.HELD_IN_MAIL
-                    ? "MAIL_DISCORD_AUDIT_SEND_HELD" : "MAIL_DISCORD_AUDIT_SEND_RETURNED";
+                    ? "mail.discord.audit.send.held" : "mail.discord.audit.send.returned";
             MailDiscordAuditBridge.send(this, settings.discordAuditChannelId,
                     translations.get(key, admin).replace("PH_MAIL_ID", findMailIdByReference(admin, correlationId)
                             .orElse(correlationId)));
@@ -242,7 +242,7 @@ class OZMailRuntime extends Plugin {
         if (!result.success() || settings == null || !settings.enableAnnouncements) return;
         Player recipient = Server.getPlayerByDbID(recipientDbId);
         if (recipient != null && MailPlayerPreferences.announcementsEnabled(recipient)) {
-            recipient.sendTextMessage(translations.get("MAIL_DELIVERY_ANNOUNCEMENT", recipient));
+            recipient.sendTextMessage(translations.get("mail.delivery.announcement", recipient));
         }
     }
 
@@ -377,33 +377,33 @@ class OZMailRuntime extends Plugin {
             return;
         }
         if ("info".equals(parts[1].trim())) {
-            player.sendTextMessage(translations.get("MAIL_INFO", player)
+            player.sendTextMessage(translations.get("mail.info", player)
                     .replace("PH_VERSION", getDescription("version")));
             return;
         }
-        player.sendTextMessage(translations.get("MAIL_COMMAND_UNKNOWN", player));
+        player.sendTextMessage(translations.get("mail.command.unknown", player));
     }
 
     public void onPlayerSpawn(PlayerSpawnEvent event) {
         Player player = event.getPlayer();
         if (mailService != null && mailboxUsage(player) >= mailboxCapacity(player)) {
             player.showWarningMessageBox(getDescription("name"),
-                    translations.get("MAIL_WARNING_MAILBOX_FULL", player));
+                    translations.get("mail.warning.mailbox.full", player));
         }
         if (settings != null && settings.enableWelcomeMessage) {
-            player.sendTextMessage(translations.get("MAIL_WELCOME", player));
+            player.sendTextMessage(translations.get("mail.welcome", player));
         }
         if (settings != null && settings.enableAnnouncements && MailPlayerPreferences.announcementsEnabled(player)) {
             int unread = unreadMailCount(player);
             if (unread > 0) {
-                player.sendTextMessage(translations.get("MAIL_UNREAD_ANNOUNCEMENT", player)
+                player.sendTextMessage(translations.get("mail.unread.announcement", player)
                         .replace("PH_UNREAD", String.valueOf(unread)));
             }
         }
         if (settings != null) {
             int expiredReturns = mailService == null ? 0 : mailService.expireAttachmentsForSender(player);
             if (expiredReturns > 0) {
-                player.sendTextMessage(translations.get("MAIL_EXPIRY_RETURNED", player)
+                player.sendTextMessage(translations.get("mail.expiry.returned", player)
                         .replace("PH_COUNT", String.valueOf(expiredReturns)));
             }
         }

@@ -1,0 +1,38 @@
+{
+  "general": {
+    "logLevel": "INFO",
+    "reloadOnChange": true,
+    "mailboxLimit": 20,
+    "maxSubjectLength": 25,
+    "maxBodyLength": 2500,
+    "maxPlayerAttachments": 5,
+    "sendCooldownSeconds": 30,
+    "attachmentExpiryDays": 30,
+    "recentPlayerDays": 30,
+    "extraMailboxBasePrice": 1000,
+    "extraMailboxPriceIncreaseFactor": 1,
+    "trustedPluginSenders": [
+      "OZ - Admin Utils",
+      "OZ - Bosses",
+      "OZ - Discord Connect",
+      "OZ - GPS",
+      "OZ - Global Intercom",
+      "OZ - Land Claim",
+      "OZ - Mail",
+      "OZ - Marketplace",
+      "OZ - Rewards",
+      "OZ - Shop",
+      "OZ - Tools",
+      "OZ - Wallet"
+    ]
+  },
+  "feature": {
+    "welcomeMessage": false,
+    "announcements": true,
+    "cod": false,
+    "extraMailboxShopOffer": true
+  },
+  "discord": {
+    "auditChannelId": 0
+  }
+}

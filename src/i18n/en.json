@@ -1,0 +1,450 @@
+{
+  "mail": {
+    "audit": {
+      "actor": {
+        "admin": "Administration",
+        "player": "Player",
+        "plugin": "Plugin",
+        "system": "System",
+        "unknown": "Unknown"
+      },
+      "admin": {
+        "claim": {
+          "cod": {
+            "refunded": "COD refunded and mail restored"
+          },
+          "verified": {
+            "claimed": "Claim verified as completed"
+          }
+        },
+        "send": {
+          "verified": {
+            "held": "Send verified as held in mail",
+            "returned": "Send verified as returned to sender"
+          }
+        }
+      },
+      "claim": {
+        "completed": "Claim completed",
+        "prepared": "Claim prepared",
+        "quarantined": "Claim quarantined for review"
+      },
+      "expiry": {
+        "return": {
+          "completed": "Expiry return completed",
+          "prepared": "Expiry return prepared",
+          "quarantined": "Expiry return quarantined for review"
+        }
+      },
+      "inbox": {
+        "deleted": "Inbox entry hidden"
+      },
+      "manual": {
+        "operation": {
+          "resolution": "Manual verification documented"
+        }
+      },
+      "outbox": {
+        "deleted": "Outbox entry hidden"
+      },
+      "return": {
+        "completed": "Return completed",
+        "prepared": "Return prepared",
+        "quarantined": "Return quarantined for review"
+      },
+      "send": {
+        "completed": "Send completed",
+        "prepared": "Send prepared",
+        "quarantined": "Send quarantined for review"
+      },
+      "unknown": "Unknown mail event"
+    },
+    "command": {
+      "unknown": "Unknown command. Use /ozmail info."
+    },
+    "data": {
+      "overview": "Inbox: PH_INBOX / PH_CAPACITY\nOutbox: PH_OUTBOX\nArchive: PH_ARCHIVE\nExtra mailboxes: PH_EXTRA"
+    },
+    "delivery": {
+      "announcement": "You have new mail. Open your mailbox with /ozmail."
+    },
+    "discord": {
+      "audit": {
+        "send": {
+          "held": "OZMail audit: Send for mail PH_MAIL_ID verified as held in mail.",
+          "returned": "OZMail audit: Send for mail PH_MAIL_ID verified as returned to sender."
+        }
+      }
+    },
+    "expiry": {
+      "returned": "PH_COUNT expired mail attachment(s) were returned to your inventory."
+    },
+    "info": "OZMail vPH_VERSION - in-game mail with recoverable delivery workflows.",
+    "menu": {
+      "open": "Open mailbox",
+      "status": "Info / status"
+    },
+    "not": {
+      "ready": "OZMail is being prepared. Mail delivery is not enabled yet."
+    },
+    "operation": {
+      "claim": "Claim",
+      "expiry": {
+        "return": "Expiry return"
+      },
+      "return": "Return",
+      "send": "Send",
+      "unknown": "Unknown operation"
+    },
+    "result": {
+      "attachment": {
+        "invalid": "The selected attachment or its amount is invalid.",
+        "limit": "The configured attachment limit has been reached."
+      },
+      "claim": {
+        "success": "Attachments claimed successfully."
+      },
+      "cooldown": {
+        "active": "Please wait briefly before sending the next mail."
+      },
+      "database": {
+        "unavailable": "OZMail is currently unavailable."
+      },
+      "invalid": {
+        "request": "The mail data is invalid."
+      },
+      "inventory": {
+        "invalid": "The required attachments are not available."
+      },
+      "mailbox": {
+        "full": "The recipient mailbox is full."
+      },
+      "operation": {
+        "failed": "The mail operation could not be completed."
+      },
+      "payment": {
+        "failed": "The cash-on-delivery payment could not be completed."
+      },
+      "plugin": {
+        "not": {
+          "trusted": "This plugin is not approved to send mail."
+        }
+      },
+      "reconciliation": {
+        "required": "The mail operation needs administrator review."
+      },
+      "sender": {
+        "unavailable": "The sender must be online for the return."
+      },
+      "success": "Mail sent successfully.",
+      "unsupported": {
+        "idempotency": "This bridge request is not supported yet."
+      }
+    },
+    "settings": {
+      "announcements": "Enable delivery notifications for your mail.",
+      "recipient": {
+        "window": "Recipient list period in days. The server value is the default.\nCurrent: PH_DAYS days"
+      },
+      "save": "Save",
+      "send": {
+        "confirmation": "Show a confirmation box after sending mail."
+      }
+    },
+    "shop": {
+      "extra": {
+        "mailbox": {
+          "desc": "Adds one full mailbox capacity.",
+          "title": "Extra mailbox"
+        }
+      }
+    },
+    "status": {
+      "info": "OZMail vPH_VERSION\nSecure in-game mail with an operation journal. Open: /ozmail",
+      "runtime": "Mailbox usage: PH_MAILBOX_USED / PH_MAILBOX_CAPACITY\nExtra mailboxes: PH_EXTRA_MAILBOXES\nAttachments per player mail: PH_ATTACHMENTS\nCash on delivery enabled: PH_COD"
+    },
+    "ui": {
+      "admin": {
+        "age": {
+          "minutes": "PH_MINUTES min"
+        },
+        "audit": {
+          "row": "PH_EVENT · Actor: PH_ACTOR"
+        },
+        "export": {
+          "failed": "Could not create queue export.",
+          "queue": "Export queue",
+          "success": "Queue export created: PH_FILE"
+        },
+        "filter": {
+          "all": "All",
+          "empty": "No operations match this filter."
+        },
+        "intro": "Administration will show the reconciliation queue and audited actions.",
+        "metrics": "Open operations: PH_ACTIVE\nReconciliation: PH_RECONCILIATION\nHeld attachments: PH_HELD\nQuarantined attachments: PH_QUARANTINED\nOldest open operation: PH_OLDEST",
+        "none": "none",
+        "queue": {
+          "empty": "No mail operation needs reconciliation.",
+          "entry": "PH_OPERATION: mail PH_MAIL_ID"
+        },
+        "reason": {
+          "$value": "Verification reason",
+          "required": "Enter a verification reason."
+        },
+        "resolution": {
+          "failed": "The verified send outcome could not be documented.",
+          "success": "The verified send outcome was documented."
+        },
+        "resolve": {
+          "claim": "Externally verified claim outcome",
+          "claimed": "Verified: attachments claimed",
+          "cod": {
+            "refund": "Refund COD and restore mail"
+          },
+          "held": "Verified: held in mail",
+          "returned": "Verified: returned to sender",
+          "send": "Externally verified send outcome (no inventory action)"
+        },
+        "search": {
+          "$value": "Mail or correlation ID",
+          "button": "Open",
+          "none": "No mail found for this reference."
+        },
+        "timeline": "Event timeline for mail PH_MAIL_ID"
+      },
+      "archive": {
+        "$value": "Archive",
+        "empty": "Your archive is empty.",
+        "failed": "Mail could not be archived.",
+        "success": "Mail was archived."
+      },
+      "attachment": {
+        "$value": "Attachment",
+        "add": "Add attachment",
+        "added": "Attachment added to the mail.",
+        "clear": "Clear attachments",
+        "confirm": "Confirm attachments",
+        "confirmed": {
+          "$value": "Attachments confirmed. The mail can now be sent.",
+          "action": "Attachments confirmed ✓"
+        },
+        "none": "No inventory attachment selected.",
+        "select": "Select inventory attachment",
+        "selected": "Selected: PH_ITEM (available: PH_AVAILABLE)"
+      },
+      "attachments": {
+        "empty": "No attachments selected.",
+        "selected": "Attachments: PH_ITEMS"
+      },
+      "back": "Back",
+      "cancel": "Cancel",
+      "claim": "Claim attachments",
+      "cod": {
+        "confirm": {
+          "$value": "Pay and claim",
+          "body": "Claiming these attachments charges PH_AMOUNT PH_CURRENCY from your Wallet. Continue?",
+          "title": "Confirm cash on delivery"
+        }
+      },
+      "col": {
+        "action": "Action",
+        "attachments": "Attachment",
+        "date": "Date",
+        "recipient": "Recipient",
+        "sender": "Sender",
+        "state": "Status",
+        "subject": "Subject"
+      },
+      "compose": {
+        "intro": "Compose controls will be available after recipient and attachment validation are connected."
+      },
+      "delete": {
+        "$value": "Delete",
+        "confirm": {
+          "$value": "Delete permanently",
+          "body": "This mail will be hidden from your mailbox. The delivery and reconciliation audit remains available.",
+          "title": "Permanently delete mail?"
+        },
+        "failed": "The mail could not be deleted.",
+        "success": "The mail was deleted."
+      },
+      "detail": {
+        "attachments": "Attachments: PH_ITEMS",
+        "cod": "Cash on delivery: PH_AMOUNT PH_CURRENCY"
+      },
+      "field": {
+        "attachment": {
+          "amount": "Amount"
+        },
+        "body": "Message",
+        "cod": {
+          "amount": "COD amount (0 \u003d none)",
+          "currency": "COD currency (empty \u003d Wallet default)"
+        },
+        "recipient": "Recipient",
+        "subject": "Subject"
+      },
+      "from": "From: PH_SENDER",
+      "inbox": {
+        "empty": "Your inbox is empty."
+      },
+      "legend": "Mail delivery is protected by a durable operation journal.",
+      "limit": "Limit: PH_LIMIT",
+      "mailbox": {
+        "capacity": "Mailbox: PH_USED / PH_CAPACITY"
+      },
+      "open": "Open",
+      "outbox": {
+        "empty": "You have not sent any mail yet."
+      },
+      "players": {
+        "admin": "Admin",
+        "col": {
+          "favorite": "Favourite",
+          "last": {
+            "seen": "Last online"
+          },
+          "name": "Player"
+        },
+        "compose": "Compose mail",
+        "empty": "No recently active players were found.",
+        "favorite": "Favourite",
+        "intro": "Players seen during the last PH_DAYS day(s), with favourites first.",
+        "unfavorite": "Unfavourite"
+      },
+      "reply": {
+        "$value": "Reply",
+        "subject": {
+          "prefix": "Re: "
+        }
+      },
+      "return": "Return to sender",
+      "send": {
+        "$value": "Send mail",
+        "confirm": {
+          "required": "Confirm the attachments before sending."
+        }
+      },
+      "state": {
+        "archived": "Archived",
+        "claimed": "Claimed",
+        "claiming": "Claiming",
+        "deleted": "Deleted",
+        "delivered": "Delivered",
+        "expired": "Expired",
+        "pending": {
+          "send": "Sending"
+        },
+        "quarantined": "Review required",
+        "read": "Read",
+        "returned": "Returned",
+        "returning": "Returning",
+        "unknown": "Unknown"
+      },
+      "subtitle": "Manage your in-game mail.",
+      "tab": {
+        "admin": "Administration",
+        "archive": "Archive",
+        "compose": "Compose",
+        "inbox": "Inbox",
+        "outbox": "Outbox",
+        "recipients": "Recipients"
+      },
+      "title": "OZMail",
+      "to": "To: PH_SENDER"
+    },
+    "unread": {
+      "announcement": "You have PH_UNREAD unread mail message(s). Open your mailbox with /ozmail."
+    },
+    "warning": {
+      "mailbox": {
+        "full": "Your mailbox has reached its maximum capacity. Archive or delete mail to receive new mail."
+      }
+    },
+    "welcome": "OZMail is available through /ozmail."
+  },
+  "tc": {
+    "setting": {
+      "attachmentexpirydays": {
+        "desc": "Days before expired attachments are returned.",
+        "label": "Attachment expiry"
+      },
+      "bridge": {
+        "desc": "Trust boundary for text-only plugin mail.",
+        "label": "Plugin bridge"
+      },
+      "delivery": {
+        "desc": "Delivery and notification runtime options.",
+        "label": "Delivery"
+      },
+      "discordauditchannelid": {
+        "desc": "Discord channel ID; 0 disables forwarding.",
+        "label": "Discord audit channel"
+      },
+      "discord": {
+        "desc": "Optional audit forwarding without mail contents.",
+        "label": "Discord"
+      },
+      "enableannouncements": {
+        "desc": "Allow global delivery notifications.",
+        "label": "Announcements"
+      },
+      "enablecod": {
+        "desc": "Enable COD with idempotent Wallet payment.",
+        "label": "Cash on delivery"
+      },
+      "enableextramailboxshopoffer": {
+        "desc": "Registers the extra mailbox offer in OZ Shop.",
+        "label": "Extra mailbox offer"
+      },
+      "enablewelcomemessage": {
+        "desc": "Send a notice when a player joins.",
+        "label": "Welcome notice"
+      },
+      "extramailboxbaseprice": {
+        "desc": "First extra mailbox price in the Wallet default currency.",
+        "label": "Extra mailbox base price"
+      },
+      "extramailboxpriceincreasefactor": {
+        "desc": "Multiplier per purchased extra mailbox; 1 means no increase.",
+        "label": "Price increase factor"
+      },
+      "extramailbox": {
+        "desc": "Shop offer for additional mailbox capacity.",
+        "label": "Extra mailboxes"
+      },
+      "mailboxlimit": {
+        "desc": "Maximum active mail per player.",
+        "label": "Mailbox limit"
+      },
+      "mailbox": {
+        "desc": "Server-owned mailbox limits.",
+        "label": "Mailbox"
+      },
+      "maxbodylength": {
+        "desc": "Maximum message characters.",
+        "label": "Message length"
+      },
+      "maxplayerattachments": {
+        "desc": "Maximum attachments per player mail.",
+        "label": "Attachment limit"
+      },
+      "maxsubjectlength": {
+        "desc": "Maximum subject characters.",
+        "label": "Subject length"
+      },
+      "recentplayerdays": {
+        "desc": "Default for each player\u0027s recipient-list period in days.",
+        "label": "Player list window"
+      },
+      "sendcooldownseconds": {
+        "desc": "Seconds between player mails.",
+        "label": "Send cooldown"
+      },
+      "trustedpluginsenders": {
+        "desc": "Comma-separated plugin names.",
+        "label": "Trusted senders"
+      }
+    }
+  }
+}

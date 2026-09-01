@@ -49,8 +49,8 @@ public final class MailboxShopIntegration {
         return (proxy, method, args) -> {
             Player player = args != null && args.length > 0 && args[0] instanceof Player p ? p : null;
             return switch (method.getName()) {
-                case "title" -> translations.get("MAIL_SHOP_EXTRA_MAILBOX_TITLE", player);
-                case "description" -> translations.get("MAIL_SHOP_EXTRA_MAILBOX_DESC", player);
+                case "title" -> translations.get("mail.shop.extra.mailbox.title", player);
+                case "description" -> translations.get("mail.shop.extra.mailbox.desc", player);
                 default -> objectMethod(proxy, method);
             };
         };

@@ -1,0 +1,450 @@
+{
+  "mail": {
+    "audit": {
+      "actor": {
+        "admin": "Administration",
+        "player": "Spieler",
+        "plugin": "Plugin",
+        "system": "System",
+        "unknown": "Unbekannt"
+      },
+      "admin": {
+        "claim": {
+          "cod": {
+            "refunded": "COD erstattet und Mail wiederhergestellt"
+          },
+          "verified": {
+            "claimed": "Abholung als erfolgt verifiziert"
+          }
+        },
+        "send": {
+          "verified": {
+            "held": "Versand als im Mailbestand verifiziert",
+            "returned": "Versand als an Absender zurück verifiziert"
+          }
+        }
+      },
+      "claim": {
+        "completed": "Abholung abgeschlossen",
+        "prepared": "Abholung vorbereitet",
+        "quarantined": "Abholung zur Prüfung quarantänisiert"
+      },
+      "expiry": {
+        "return": {
+          "completed": "Ablauf-Rückgabe abgeschlossen",
+          "prepared": "Ablauf-Rückgabe vorbereitet",
+          "quarantined": "Ablauf-Rückgabe zur Prüfung quarantänisiert"
+        }
+      },
+      "inbox": {
+        "deleted": "Posteingangseintrag ausgeblendet"
+      },
+      "manual": {
+        "operation": {
+          "resolution": "Manuelle Prüfung dokumentiert"
+        }
+      },
+      "outbox": {
+        "deleted": "Postausgangseintrag ausgeblendet"
+      },
+      "return": {
+        "completed": "Rückgabe abgeschlossen",
+        "prepared": "Rückgabe vorbereitet",
+        "quarantined": "Rückgabe zur Prüfung quarantänisiert"
+      },
+      "send": {
+        "completed": "Versand abgeschlossen",
+        "prepared": "Versand vorbereitet",
+        "quarantined": "Versand zur Prüfung quarantänisiert"
+      },
+      "unknown": "Unbekanntes Mail-Ereignis"
+    },
+    "command": {
+      "unknown": "Unbekanntes Kommando. Nutze /ozmail info."
+    },
+    "data": {
+      "overview": "Posteingang: PH_INBOX / PH_CAPACITY\nPostausgang: PH_OUTBOX\nArchiv: PH_ARCHIVE\nExtra-Postfächer: PH_EXTRA"
+    },
+    "delivery": {
+      "announcement": "Du hast neue Post. Öffne dein Postfach mit /ozmail."
+    },
+    "discord": {
+      "audit": {
+        "send": {
+          "held": "OZMail-Audit: Versand für Mail PH_MAIL_ID als im Mailbestand verifiziert.",
+          "returned": "OZMail-Audit: Versand für Mail PH_MAIL_ID als an Absender zurück verifiziert."
+        }
+      }
+    },
+    "expiry": {
+      "returned": "PH_COUNT abgelaufene Mail-Anhang/Anhänge wurden an dein Inventar zurückgegeben."
+    },
+    "info": "OZMail vPH_VERSION - Ingame-Post mit wiederherstellbaren Zustellabläufen.",
+    "menu": {
+      "open": "Postfach öffnen",
+      "status": "Info / Status"
+    },
+    "not": {
+      "ready": "OZMail wird vorbereitet. Der Mailversand ist noch nicht aktiviert."
+    },
+    "operation": {
+      "claim": "Abholung",
+      "expiry": {
+        "return": "Ablauf-Rückgabe"
+      },
+      "return": "Rückgabe",
+      "send": "Versand",
+      "unknown": "Unbekannter Vorgang"
+    },
+    "result": {
+      "attachment": {
+        "invalid": "Der ausgewählte Anhang oder seine Menge ist ungültig.",
+        "limit": "Das konfigurierte Anhangslimit wurde erreicht."
+      },
+      "claim": {
+        "success": "Die Anhänge wurden erfolgreich entnommen."
+      },
+      "cooldown": {
+        "active": "Bitte warte kurz, bevor du die nächste Mail versendest."
+      },
+      "database": {
+        "unavailable": "OZMail ist momentan nicht verfügbar."
+      },
+      "invalid": {
+        "request": "Die Maildaten sind ungültig."
+      },
+      "inventory": {
+        "invalid": "Die benötigten Anhänge sind nicht verfügbar."
+      },
+      "mailbox": {
+        "full": "Das Postfach des Empfängers ist voll."
+      },
+      "operation": {
+        "failed": "Der Mailvorgang konnte nicht abgeschlossen werden."
+      },
+      "payment": {
+        "failed": "Die Nachnahmezahlung konnte nicht durchgeführt werden."
+      },
+      "plugin": {
+        "not": {
+          "trusted": "Dieses Plugin ist nicht für den Mailversand freigegeben."
+        }
+      },
+      "reconciliation": {
+        "required": "Der Mailvorgang muss von einem Administrator geprüft werden."
+      },
+      "sender": {
+        "unavailable": "Der Absender muss für die Rückgabe online sein."
+      },
+      "success": "Die Mail wurde erfolgreich versendet.",
+      "unsupported": {
+        "idempotency": "Diese Bridge-Anfrage wird noch nicht unterstützt."
+      }
+    },
+    "settings": {
+      "announcements": "Zustellhinweise für deine Mail aktivieren.",
+      "recipient": {
+        "window": "Zeitraum der Empfängerliste in Tagen. Der Serverwert ist der Standard.\nAktuell: PH_DAYS Tage"
+      },
+      "save": "Speichern",
+      "send": {
+        "confirmation": "Nach dem Versenden einer Mail eine Bestätigungsbox anzeigen."
+      }
+    },
+    "shop": {
+      "extra": {
+        "mailbox": {
+          "desc": "Erhöht die Postfachkapazität um ein volles Postfach.",
+          "title": "Zusätzliches Postfach"
+        }
+      }
+    },
+    "status": {
+      "info": "OZMail vPH_VERSION\nSichere Ingame-Post mit Operationsjournal. Öffnen: /ozmail",
+      "runtime": "Postfachauslastung: PH_MAILBOX_USED / PH_MAILBOX_CAPACITY\nExtra-Postfächer: PH_EXTRA_MAILBOXES\nAnhänge pro Spieler-Mail: PH_ATTACHMENTS\nNachnahme aktiviert: PH_COD"
+    },
+    "ui": {
+      "admin": {
+        "age": {
+          "minutes": "PH_MINUTES Min."
+        },
+        "audit": {
+          "row": "PH_EVENT · Akteur: PH_ACTOR"
+        },
+        "export": {
+          "failed": "Queue-Export konnte nicht erstellt werden.",
+          "queue": "Queue exportieren",
+          "success": "Queue-Export erstellt: PH_FILE"
+        },
+        "filter": {
+          "all": "Alle",
+          "empty": "Keine Vorgänge entsprechen diesem Filter."
+        },
+        "intro": "Die Administration zeigt die Reconciliation-Warteschlange und protokollierte Aktionen.",
+        "metrics": "Offene Vorgänge: PH_ACTIVE\nReconciliation: PH_RECONCILIATION\nVerwahrte Anhänge: PH_HELD\nQuarantänisierte Anhänge: PH_QUARANTINED\nÄltester offener Vorgang: PH_OLDEST",
+        "none": "keiner",
+        "queue": {
+          "empty": "Keine Mailoperation benötigt eine Prüfung.",
+          "entry": "PH_OPERATION: Mail PH_MAIL_ID"
+        },
+        "reason": {
+          "$value": "Prüfgrund",
+          "required": "Gib einen Prüfgrund an."
+        },
+        "resolution": {
+          "failed": "Das verifizierte Versandergebnis konnte nicht dokumentiert werden.",
+          "success": "Das verifizierte Versandergebnis wurde dokumentiert."
+        },
+        "resolve": {
+          "claim": "Extern verifiziertes Abholergebnis",
+          "claimed": "Verifiziert: Anhänge abgeholt",
+          "cod": {
+            "refund": "COD erstatten und Mail wiederherstellen"
+          },
+          "held": "Verifiziert: im Mailbestand",
+          "returned": "Verifiziert: an Absender zurück",
+          "send": "Extern verifiziertes Versandergebnis (keine Inventaraktion)"
+        },
+        "search": {
+          "$value": "Mail- oder Korrelations-ID",
+          "button": "Öffnen",
+          "none": "Keine Mail zu dieser Referenz gefunden."
+        },
+        "timeline": "Ereignisverlauf für Mail PH_MAIL_ID"
+      },
+      "archive": {
+        "$value": "Archivieren",
+        "empty": "Dein Archiv ist leer.",
+        "failed": "Mail konnte nicht archiviert werden.",
+        "success": "Mail wurde archiviert."
+      },
+      "attachment": {
+        "$value": "Anhang",
+        "add": "Anhang hinzufügen",
+        "added": "Anhang zur Mail hinzugefügt.",
+        "clear": "Anhänge leeren",
+        "confirm": "Anhänge bestätigen",
+        "confirmed": {
+          "$value": "Anhänge bestätigt. Die Mail kann jetzt versendet werden.",
+          "action": "Anhänge bestätigt ✓"
+        },
+        "none": "Kein Inventar-Anhang ausgewählt.",
+        "select": "Inventar-Anhang auswählen",
+        "selected": "Ausgewählt: PH_ITEM (verfügbar: PH_AVAILABLE)"
+      },
+      "attachments": {
+        "empty": "Keine Anhänge ausgewählt.",
+        "selected": "Anhänge: PH_ITEMS"
+      },
+      "back": "Zurück",
+      "cancel": "Abbrechen",
+      "claim": "Anhänge abholen",
+      "cod": {
+        "confirm": {
+          "$value": "Bezahlen und abholen",
+          "body": "Beim Abholen dieser Anhänge werden PH_AMOUNT PH_CURRENCY aus deiner Wallet bezahlt. Fortfahren?",
+          "title": "Nachnahme bestätigen"
+        }
+      },
+      "col": {
+        "action": "Aktion",
+        "attachments": "Anhang",
+        "date": "Datum",
+        "recipient": "Empfänger",
+        "sender": "Absender",
+        "state": "Status",
+        "subject": "Betreff"
+      },
+      "compose": {
+        "intro": "Die Formulare folgen, sobald Empfänger- und Anhangsprüfung verbunden sind."
+      },
+      "delete": {
+        "$value": "Löschen",
+        "confirm": {
+          "$value": "Endgültig löschen",
+          "body": "Diese Mail wird aus deinem Postfach ausgeblendet. Das Zustell- und Prüfprotokoll bleibt erhalten.",
+          "title": "Mail endgültig löschen?"
+        },
+        "failed": "Die Mail konnte nicht gelöscht werden.",
+        "success": "Die Mail wurde gelöscht."
+      },
+      "detail": {
+        "attachments": "Anhänge: PH_ITEMS",
+        "cod": "Nachnahme: PH_AMOUNT PH_CURRENCY"
+      },
+      "field": {
+        "attachment": {
+          "amount": "Menge"
+        },
+        "body": "Nachricht",
+        "cod": {
+          "amount": "Nachnahmebetrag (0 \u003d keine)",
+          "currency": "Nachnahme-Währung (leer \u003d Wallet-Standard)"
+        },
+        "recipient": "Empfänger",
+        "subject": "Betreff"
+      },
+      "from": "Von: PH_SENDER",
+      "inbox": {
+        "empty": "Dein Posteingang ist leer."
+      },
+      "legend": "Die Mailzustellung wird durch ein dauerhaftes Operationsjournal geschützt.",
+      "limit": "Limit: PH_LIMIT",
+      "mailbox": {
+        "capacity": "Postfach: PH_USED / PH_CAPACITY"
+      },
+      "open": "Öffnen",
+      "outbox": {
+        "empty": "Du hast noch keine Mail versendet."
+      },
+      "players": {
+        "admin": "Admin",
+        "col": {
+          "favorite": "Favorit",
+          "last": {
+            "seen": "Zuletzt online"
+          },
+          "name": "Spieler"
+        },
+        "compose": "Mail verfassen",
+        "empty": "Keine kürzlich aktiven Spieler gefunden.",
+        "favorite": "Favorit",
+        "intro": "Spieler, die in den letzten PH_DAYS Tagen online waren; Favoriten stehen oben.",
+        "unfavorite": "Favorit entfernen"
+      },
+      "reply": {
+        "$value": "Antworten",
+        "subject": {
+          "prefix": "Re: "
+        }
+      },
+      "return": "An Absender zurück",
+      "send": {
+        "$value": "Mail senden",
+        "confirm": {
+          "required": "Bestätige die Anhänge vor dem Versand."
+        }
+      },
+      "state": {
+        "archived": "Archiviert",
+        "claimed": "Abgeholt",
+        "claiming": "Abholung läuft",
+        "deleted": "Gelöscht",
+        "delivered": "Zugestellt",
+        "expired": "Abgelaufen",
+        "pending": {
+          "send": "Versand läuft"
+        },
+        "quarantined": "Prüfung nötig",
+        "read": "Gelesen",
+        "returned": "Zurückgegeben",
+        "returning": "Rückgabe läuft",
+        "unknown": "Unbekannt"
+      },
+      "subtitle": "Verwalte deine Ingame-Post.",
+      "tab": {
+        "admin": "Administration",
+        "archive": "Archiv",
+        "compose": "Mail verfassen",
+        "inbox": "Posteingang",
+        "outbox": "Postausgang",
+        "recipients": "Empfänger"
+      },
+      "title": "OZMail",
+      "to": "An: PH_SENDER"
+    },
+    "unread": {
+      "announcement": "Du hast PH_UNREAD ungelesene Mail(s). Öffne dein Postfach mit /ozmail."
+    },
+    "warning": {
+      "mailbox": {
+        "full": "Dein Postfach hat die maximale Kapazität erreicht. Archiviere oder lösche Mails, um neue Mails empfangen zu können."
+      }
+    },
+    "welcome": "OZMail ist über /ozmail verfügbar."
+  },
+  "tc": {
+    "setting": {
+      "attachmentexpirydays": {
+        "desc": "Tage bis zur Rückgabe abgelaufener Anhänge.",
+        "label": "Anhang-Ablauf"
+      },
+      "bridge": {
+        "desc": "Vertrauensgrenze für reine Plugin-Mails.",
+        "label": "Plugin-Bridge"
+      },
+      "delivery": {
+        "desc": "Laufzeitoptionen für Zustellung und Hinweise.",
+        "label": "Zustellung"
+      },
+      "discordauditchannelid": {
+        "desc": "Discord-Kanal-ID; 0 deaktiviert die Weiterleitung.",
+        "label": "Discord-Audit-Kanal"
+      },
+      "discord": {
+        "desc": "Optionale Auditweiterleitung ohne Mailinhalte.",
+        "label": "Discord"
+      },
+      "enableannouncements": {
+        "desc": "Globale Zustellhinweise erlauben.",
+        "label": "Ankündigungen"
+      },
+      "enablecod": {
+        "desc": "Nachnahme mit idempotenter Wallet-Zahlung aktivieren.",
+        "label": "Nachnahme"
+      },
+      "enableextramailboxshopoffer": {
+        "desc": "Registriert das Extra-Postfach-Angebot in OZ Shop.",
+        "label": "Extra-Postfach-Angebot"
+      },
+      "enablewelcomemessage": {
+        "desc": "Hinweis beim Betreten senden.",
+        "label": "Willkommenshinweis"
+      },
+      "extramailboxbaseprice": {
+        "desc": "Preis für das erste Extra-Postfach in der Wallet-Standardwährung.",
+        "label": "Extra-Postfach-Grundpreis"
+      },
+      "extramailboxpriceincreasefactor": {
+        "desc": "Multiplikator je bereits gekauftem Extra-Postfach; 1 bedeutet kein Anstieg.",
+        "label": "Preisfaktor"
+      },
+      "extramailbox": {
+        "desc": "Shop-Angebot für zusätzliche Postfachkapazität.",
+        "label": "Extra-Postfächer"
+      },
+      "mailboxlimit": {
+        "desc": "Maximale aktive Mails pro Spieler.",
+        "label": "Postfachlimit"
+      },
+      "mailbox": {
+        "desc": "Serverseitige Begrenzungen für Postfächer.",
+        "label": "Postfach"
+      },
+      "maxbodylength": {
+        "desc": "Maximale Zeichen pro Nachricht.",
+        "label": "Nachrichtenlänge"
+      },
+      "maxplayerattachments": {
+        "desc": "Maximale Anhänge pro Spieler-Mail.",
+        "label": "Anhangslimit"
+      },
+      "maxsubjectlength": {
+        "desc": "Maximale Zeichen im Betreff.",
+        "label": "Betrefflänge"
+      },
+      "recentplayerdays": {
+        "desc": "Standardwert fuer die persoenliche Empfaengerliste in Tagen.",
+        "label": "Spielerliste Zeitraum"
+      },
+      "sendcooldownseconds": {
+        "desc": "Sekunden zwischen Spieler-Mails.",
+        "label": "Sende-Cooldown"
+      },
+      "trustedpluginsenders": {
+        "desc": "Kommagetrennte Plugin-Namen.",
+        "label": "Vertrauenswürdige Sender"
+      }
+    }
+  }
+}

@@ -25,14 +25,14 @@ public final class MailPlayerPluginSettings extends PlayerPluginSettings {
             @Override protected void redrawContent() {
                 flexWrapper.removeAllChilds();
                 OZUIElement announcements = defaultSettingsContainer();
-                announcements.addChild(defaultSettingsLabel(plugin.text("MAIL_SETTINGS_ANNOUNCEMENTS", player)));
+                announcements.addChild(defaultSettingsLabel(plugin.text("mail.settings.announcements", player)));
                 announcements.addChild(switchButtons(player, MailPlayerPreferences.announcementsEnabled(player), event -> {
                     MailPlayerPreferences.setAnnouncementsEnabled(player, !MailPlayerPreferences.announcementsEnabled(player));
                     redrawContent();
                 }));
                 flexWrapper.addChild(announcements);
                 OZUIElement sendConfirmation = defaultSettingsContainer();
-                sendConfirmation.addChild(defaultSettingsLabel(plugin.text("MAIL_SETTINGS_SEND_CONFIRMATION", player)));
+                sendConfirmation.addChild(defaultSettingsLabel(plugin.text("mail.settings.send.confirmation", player)));
                 sendConfirmation.addChild(switchButtons(player, MailPlayerPreferences.sendConfirmationEnabled(player), event -> {
                     MailPlayerPreferences.setSendConfirmationEnabled(player,
                             !MailPlayerPreferences.sendConfirmationEnabled(player));
@@ -44,7 +44,7 @@ public final class MailPlayerPluginSettings extends PlayerPluginSettings {
 
             private OZUIElement recipientWindowSetting(Player player) {
                 OZUIElement setting = defaultSettingsContainer();
-                setting.addChild(defaultSettingsLabel(plugin.text("MAIL_SETTINGS_RECIPIENT_WINDOW", player)
+                setting.addChild(defaultSettingsLabel(plugin.text("mail.settings.recipient.window", player)
                         .replace("PH_DAYS", String.valueOf(plugin.recipientWindowDays(player)))));
 
                 UITextField days = new UITextField(String.valueOf(plugin.recipientWindowDays(player)));
@@ -54,7 +54,7 @@ public final class MailPlayerPluginSettings extends PlayerPluginSettings {
                 days.setMaxCharacters(4);
                 setting.addChild(days);
 
-                AdvancedButton save = AdvancedButtonFactory.defaultButton(plugin.text("MAIL_SETTINGS_SAVE", player), event ->
+                AdvancedButton save = AdvancedButtonFactory.defaultButton(plugin.text("mail.settings.save", player), event ->
                         days.getCurrentText(player, value -> {
                             try {
                                 if (value != null) {
