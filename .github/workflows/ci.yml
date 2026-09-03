@@ -35,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
       - name: Install PluginAPI locally
-        run: mvn -B install:install-file -Dfile=libs/PluginAPI.jar -DgroupId=net.risingworld -DartifactId=PluginAPI -Dversion=0.9.2 -Dpackaging=jar
+        run: mvn -B install:install-file -Dfile=libs/PluginAPI.jar -DgroupId=net.risingworld -DartifactId=PluginAPI -Dversion=0.9.3 -Dpackaging=jar
       - run: mvn -B package
       - run: ls dist/*.zip
 
@@ -60,7 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
       - name: Install PluginAPI locally
-        run: mvn -B install:install-file -Dfile=libs/PluginAPI.jar -DgroupId=net.risingworld -DartifactId=PluginAPI -Dversion=0.9.2 -Dpackaging=jar
+        run: mvn -B install:install-file -Dfile=libs/PluginAPI.jar -DgroupId=net.risingworld -DartifactId=PluginAPI -Dversion=0.9.3 -Dpackaging=jar
       - name: Verify the release version
         run: |
           test "${GITHUB_REF_NAME#v}" = "$(sed -n 's/^version: //p' src/resources/plugin.yml)"
