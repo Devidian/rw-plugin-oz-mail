@@ -1,7 +1,5 @@
 {
   "general": {
-    "logLevel": "INFO",
-    "reloadOnChange": true,
     "mailboxLimit": 20,
     "maxSubjectLength": 25,
     "maxBodyLength": 2500,
