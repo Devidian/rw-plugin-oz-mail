@@ -3,6 +3,7 @@
 ## [0.1.16] - 2026-09-05 | PluginAPI compatibility
 
 - build: update the bundled PluginAPI and JSON settings baseline for the native web release wave.
+- change: migrate Mail settings and translations to JSON while retaining existing mailbox data and configuration.
 
 ## [0.1.15] - 2026-08-10 | System reports
 

@@ -18,6 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Require changelog fragments for runtime changes
+        if: github.event_name == 'pull_request'
+        env:
+          CHANGELOG_BASE_REF: ${{ github.event.pull_request.base.sha }}
+        run: ./scripts/verify-changelog-fragments.sh
       - name: Verify entry-point architecture
         run: ./scripts/verify-entrypoint-architecture.sh
       - uses: actions/setup-java@v5
@@ -45,6 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Require curated changelog and release notes
+        run: |
+          ! find changelog/unreleased -type f -name '*.md' -print -quit | grep -q .
+          test -s "release-notes/${GITHUB_REF_NAME#v}.md"
       - uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}

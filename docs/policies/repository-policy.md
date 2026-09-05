@@ -25,3 +25,14 @@
 
 - Run architecture, Maven test/package, plugin API, and runtime smoke checks
   before release.
+
+## Changelog and Release Policy
+
+- Every commit changing `src/`, `pom.xml`, or the bundled PluginAPI must add
+  exactly one descriptive Markdown fragment under `changelog/unreleased/`.
+- Before a release, review all pending fragments together: remove reverted or
+  mutually cancelling work, consolidate the remaining entries into
+  `HISTORY.md`, and put only player-relevant highlights in
+  `release-notes/<version>.md`. Remove consumed fragments in the same
+  release-preparation commit.
+- Do not publish a release while pending fragments remain.
