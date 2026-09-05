@@ -1,5 +1,11 @@
 # History
 
+## [0.1.17] - 2026-09-06 | Item editor and localization fixes
+
+- Show localized object-kit names when selecting attachments.
+- Translate selected and received attachment summaries into the viewing player’s language.
+- build: ship JSON settings and translations only; retain existing-server migration and backups.
+
 ## [0.1.16] - 2026-09-05 | PluginAPI compatibility
 
 - build: update the bundled PluginAPI and JSON settings baseline for the native web release wave.
