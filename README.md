@@ -64,3 +64,5 @@ are no longer included. Runtime settings remain world-scoped as
 its backup remains supported. Updating the package does not delete old files
 already present on the server. Use `mvn clean package` for a fresh local
 package; ZIP assembly also excludes stale legacy settings and translations.
+
+Object-kit inventory selections use the localized object name. Selected and received attachment summaries follow the viewing player’s language.

@@ -127,7 +127,10 @@ public final class MailInventoryTransfer {
     }
 
     private static AttachmentCandidate snapshot(String itemName, Item item, String language) {
-        String localizedName = item.getLocalizedName(language);
+        String localizedName = MailItemNames.objectDefinition(itemName, item.getVariant()) == null
+                ? item.getLocalizedName(language)
+                : MailItemNames.localizedName(itemName, item.getVariant(), language);
+        if (localizedName == null || localizedName.isBlank()) localizedName = item.getLocalizedName(language);
         String displayName = localizedName == null || localizedName.isBlank()
                 ? MailItemNames.label(itemName, item.getVariant())
                 : localizedName.trim();
@@ -201,6 +204,8 @@ public final class MailInventoryTransfer {
                 itemName + ":" + variant + ":" + durability + ":" + status + ":" + modifier + ":" + color,
                 durability, status, modifier, color); }
     }
+
+    public static String displayName(String itemName, int variant, String language) { return MailItemNames.label(itemName, variant, language); }
 
     public static String displayName(String itemName, int variant) { return MailItemNames.label(itemName, variant); }
 }

@@ -579,7 +579,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         body.addChild(content);
         if (mail.hasAttachments()) {
             String attachmentText = mail.attachments().stream()
-                    .map(attachment -> MailInventoryTransfer.displayName(attachment.itemName(), attachment.variant())
+                    .map(attachment -> MailInventoryTransfer.displayName(attachment.itemName(), attachment.variant(), uiPlayer.getLanguage())
                             + " x" + attachment.amount())
                     .reduce((left, right) -> left + ", " + right).orElse("");
             UILabel attachments = new UILabel(t().get("mail.ui.detail.attachments", uiPlayer)
@@ -1105,7 +1105,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             return;
         }
         String items = selectedAttachments.values().stream()
-                .map(item -> MailInventoryTransfer.displayName(item.itemName(), item.variant()) + " x" + item.amount())
+                .map(item -> MailInventoryTransfer.displayName(item.itemName(), item.variant(), uiPlayer.getLanguage()) + " x" + item.amount())
                 .reduce((left, right) -> left + ", " + right).orElse("");
         attachmentsLabel.setText(t().get("mail.ui.attachments.selected", uiPlayer).replace("PH_ITEMS", items));
         updateAttachmentControls();

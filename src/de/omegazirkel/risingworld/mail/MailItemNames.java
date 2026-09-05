@@ -32,7 +32,25 @@ public final class MailItemNames {
         return labelVariant == 0 ? derivedBaseName(baseName) : derivedBaseName(baseName) + "-" + labelVariant;
     }
 
-    private static ObjectDefinition objectDefinition(String itemName, int itemVariant) {
+    public static String label(String itemName, int variant, String language) {
+        String localized = localizedName(itemName, variant, language);
+        return blank(localized) ? label(itemName, variant) : localized.trim();
+    }
+
+    static String localizedName(String itemName, int variant, String language) {
+        ObjectDefinition object = objectDefinition(itemName, variant);
+        if (object != null) return object.getLocalizedName(language);
+        ItemDefinition item = Definitions.getItemDefinition(itemName);
+        if (item != null) return item.getLocalizedName(language);
+        ConstructionDefinition construction = Definitions.getConstructionDefinition(itemName);
+        if (construction != null) return construction.getLocalizedName(language);
+        ClothingDefinition clothing = Definitions.getClothingDefinition(itemName);
+        if (clothing != null) return clothing.getLocalizedName(language);
+        PlantDefinition plant = Definitions.getPlantDefinition(itemName);
+        return plant == null ? "" : plant.getLocalizedName(language);
+    }
+
+    static ObjectDefinition objectDefinition(String itemName, int itemVariant) {
         ObjectDefinition direct = Definitions.getObjectDefinition(itemName);
         if (direct != null) return direct;
         ItemDefinition itemDefinition = Definitions.getItemDefinition(itemName);
