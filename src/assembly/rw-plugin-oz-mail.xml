@@ -4,5 +4,6 @@
     <id>plugin-assembly</id>
     <formats><format>zip</format></formats>
     <includeBaseDirectory>false</includeBaseDirectory>
-    <fileSets><fileSet><directory>${project.basedir}/dist/OZMail</directory><outputDirectory>/OZMail</outputDirectory><includes><include>**/*</include></includes></fileSet></fileSets>
+    <fileSets><fileSet><directory>${project.basedir}/dist/OZMail</directory><outputDirectory>/OZMail</outputDirectory><includes><include>**/*</include></includes><excludes><exclude>settings*.properties</exclude><exclude>i18n/**/*.properties</exclude></excludes>
+        </fileSet></fileSets>
 </assembly>

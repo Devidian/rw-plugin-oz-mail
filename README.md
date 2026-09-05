@@ -12,7 +12,7 @@ The shared OZ Tools `MailBridge` provides API version 2 for text and trusted
 plugin-originated attachments. Consumers must use a stable correlation ID;
 repeated requests with the same ID return the original completed result.
 The operator must explicitly list each sender plugin in
-`trustedPluginSenders` in `settings.properties`; all canonical OZ plugins are
+`trustedPluginSenders` in `settings.<world>.json`; all canonical OZ plugins are
 present in the default settings. Attachment callers transfer already-owned custody to
 Mail and may probe mailbox capacity before changing external inventory. COD is
 not accepted through this bridge. The request sender name must match the
@@ -54,3 +54,13 @@ attachments without their color.
 ```sh
 mvn -B -DskipTests package
 ```
+
+## JSON-only distribution
+
+Settings defaults (`settings.default.json`) and translations (`i18n/*.json`)
+are shipped only as JSON. Legacy default and translation `.properties` files
+are no longer included. Runtime settings remain world-scoped as
+`settings.<world>.json`; migration of an existing `settings.properties` and
+its backup remains supported. Updating the package does not delete old files
+already present on the server. Use `mvn clean package` for a fresh local
+package; ZIP assembly also excludes stale legacy settings and translations.

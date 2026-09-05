@@ -88,10 +88,8 @@
                 <version>3.3.1</version>
                 <executions>
                     <execution><id>copy-assets</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}/assets</outputDirectory><resources><resource><directory>${basedir}/src/assets</directory><includes><include>**/*</include></includes></resource></resources></configuration></execution>
-                    <execution><id>copy-settings</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}</outputDirectory><resources><resource><directory>${basedir}/src</directory><includes><include>*.json</include>
-                                        <include>*.properties</include></includes></resource></resources></configuration></execution>
-                    <execution><id>copy-i18n</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}/i18n</outputDirectory><resources><resource><directory>${basedir}/src/i18n</directory><includes><include>*.json</include>
-                                        <include>*.properties</include></includes></resource></resources></configuration></execution>
+                    <execution><id>copy-settings</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}</outputDirectory><resources><resource><directory>${basedir}/src</directory><includes><include>*.json</include></includes></resource></resources></configuration></execution>
+                    <execution><id>copy-i18n</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}/i18n</outputDirectory><resources><resource><directory>${basedir}/src/i18n</directory><includes><include>*.json</include></includes></resource></resources></configuration></execution>
                     <execution><id>copy-docs</id><phase>prepare-package</phase><goals><goal>copy-resources</goal></goals><configuration><outputDirectory>${basedir}/dist/${project.name}</outputDirectory><resources><resource><directory>${basedir}</directory><includes><include>README.md</include><include>HISTORY.md</include></includes></resource></resources></configuration></execution>
                 </executions>
             </plugin>
