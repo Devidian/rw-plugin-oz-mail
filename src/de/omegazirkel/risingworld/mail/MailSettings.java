@@ -62,8 +62,7 @@ public final class MailSettings {
         enableExtraMailboxShopOffer = bool(values, defaults, "enableExtraMailboxShopOffer", true);
         extraMailboxBasePrice = longValue(values, defaults, "extraMailboxBasePrice", 1000L, 0L, Long.MAX_VALUE);
         extraMailboxPriceIncreaseFactor = decimal(values, defaults, "extraMailboxPriceIncreaseFactor", 1d, 1d, 100d);
-        trustedPluginSenders = pluginNames(values.getProperty("trustedPluginSenders",
-                defaults.getProperty("trustedPluginSenders", "")));
+        trustedPluginSenders = trustedPluginSenders(values, defaults);
         currentSettings = values;
         defaultSettings = defaults;
     }
@@ -189,6 +188,11 @@ public final class MailSettings {
 
     public boolean isTrustedPluginSender(String pluginName) {
         return pluginName != null && trustedPluginSenders.contains(pluginName.trim().toLowerCase(Locale.ROOT));
+    }
+
+    static Set<String> trustedPluginSenders(Properties values, Properties defaults) {
+        String configured = values.getProperty("trustedPluginSenders", "");
+        return pluginNames(configured.isBlank() ? defaults.getProperty("trustedPluginSenders", "") : configured);
     }
 
     private static Set<String> pluginNames(String raw) {
