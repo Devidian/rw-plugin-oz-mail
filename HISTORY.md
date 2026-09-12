@@ -1,5 +1,9 @@
 # History
 
+## [0.1.18] - 2026-09-13 | Trusted plugin sender defaults
+
+- fix: use the bundled trusted plugin sender list when the configured list is empty.
+
 ## [0.1.17] - 2026-09-06 | Item editor and localization fixes
 
 - Show localized object-kit names when selecting attachments.
