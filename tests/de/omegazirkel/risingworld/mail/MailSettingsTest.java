@@ -12,9 +12,10 @@ public class MailSettingsTest {
         Properties values = new Properties();
         values.setProperty("trustedPluginSenders", "");
         Properties defaults = new Properties();
-        defaults.setProperty("trustedPluginSenders", "OZ - Bosses,OZ - Shop");
+        defaults.setProperty("trustedPluginSenders", "OZ - Bosses,OZ - Service NPC,OZ - Shop");
 
         assertTrue(MailSettings.trustedPluginSenders(values, defaults).contains("oz - bosses"));
+        assertTrue(MailSettings.trustedPluginSenders(values, defaults).contains("oz - service npc"));
         assertTrue(MailSettings.trustedPluginSenders(values, defaults).contains("oz - shop"));
     }
 }

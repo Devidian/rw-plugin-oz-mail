@@ -6,7 +6,7 @@
 
     <groupId>com.github.devidian</groupId>
     <artifactId>rw-plugin-oz-mail</artifactId>
-    <version>0.1.18</version>
+    <version>0.1.19</version>
     <name>OZMail</name>
     <description>In-game mail for Rising World</description>
 
@@ -39,6 +39,12 @@
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.36.0.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.14.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

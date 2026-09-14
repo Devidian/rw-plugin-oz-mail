@@ -1,5 +1,9 @@
 # History
 
+## [0.1.19] - 2026-09-14 | Service NPC mail delivery
+
+- fix: trust `OZ - Service NPC` by default so completed service orders can be delivered through OZ Mail.
+
 ## [0.1.18] - 2026-09-13 | Trusted plugin sender defaults
 
 - fix: use the bundled trusted plugin sender list when the configured list is empty.
