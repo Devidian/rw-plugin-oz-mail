@@ -202,6 +202,45 @@ public class MailDatabaseTest {
     }
 
     @Test
+    public void pluginAttachmentMailCanBeClaimedOneAttachmentAtATime() throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
+            MailDatabase database = new MailDatabase(connection);
+            MailDatabase.PreparedMail prepared = database.prepareOutgoingMail(0, "OZ - LandClaim", 22, "Recipient",
+                    "Demolition", "Body", List.of(new MailAttachment("wood", 0, 2, "wood:0:2"),
+                            new MailAttachment("stone", 0, 3, "stone:0:3")), 0L, "", "OZ - LandClaim");
+            assertTrue(database.completeSend(prepared, 0));
+
+            MailDatabase.SingleClaimPreparation first = database.prepareSingleClaim(22, prepared.mailId());
+            assertTrue(first != null);
+            assertEquals("wood", first.attachment().itemName());
+            assertTrue(database.completeSingleClaim(first, 22, true));
+            assertEquals(1, database.findInboxMail(22, prepared.mailId()).orElseThrow().attachments().size());
+
+            MailDatabase.SingleClaimPreparation second = database.prepareSingleClaim(22, prepared.mailId());
+            assertTrue(second != null);
+            assertEquals("stone", second.attachment().itemName());
+            assertTrue(database.completeSingleClaim(second, 22, true));
+            assertFalse(database.findInboxMail(22, prepared.mailId()).orElseThrow().hasAttachments());
+        }
+    }
+
+    @Test
+    public void singleClaimRejectsOtherRecipientAndPlayerMail() throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
+            MailDatabase database = new MailDatabase(connection);
+            MailDatabase.PreparedMail plugin = database.prepareOutgoingMail(0, "OZ - LandClaim", 22, "Recipient",
+                    "Demolition", "Body", List.of(new MailAttachment("wood", 0, 1, "wood:0:1")), 0L, "", "OZ - LandClaim");
+            MailDatabase.PreparedMail player = database.prepareOutgoingMail(11, "Sender", 22, "Recipient",
+                    "Player mail", "Body", List.of(new MailAttachment("stone", 0, 1, "stone:0:1")), 0L, "", "");
+            assertTrue(database.completeSend(plugin, 0));
+            assertTrue(database.completeSend(player, 11));
+
+            assertTrue(database.prepareSingleClaim(99, plugin.mailId()) == null);
+            assertTrue(database.prepareSingleClaim(22, player.mailId()) == null);
+        }
+    }
+
+    @Test
     public void legacyClaimedMailCanBeArchivedAndDeleted() throws Exception {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
             MailDatabase database = new MailDatabase(connection);

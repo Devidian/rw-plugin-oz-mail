@@ -239,6 +239,7 @@
       "back": "Zurück",
       "cancel": "Abbrechen",
       "claim": "Anhänge abholen",
+      "claim.next": "Nächstes Item abholen",
       "cod": {
         "confirm": {
           "$value": "Bezahlen und abholen",

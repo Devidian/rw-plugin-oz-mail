@@ -10,6 +10,8 @@ import net.risingworld.api.objects.Player;
 
 /** First mail saga: durable intent, sender inventory custody, then delivery. */
 public final class MailService {
+    /** Plugin deliveries are durable, one-at-a-time claimable stacks, not the five-slot player compose UI. */
+    private static final int MAX_PLUGIN_ATTACHMENTS = 1_024;
     private final MailDatabase database;
     private final MailSettings settings;
     private final WalletBridge wallet;
@@ -33,7 +35,8 @@ public final class MailService {
         if (sender == null || sender.getDbID() <= 0) {
             return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "sender has no database id");
         }
-        MailSendResult validation = validate(recipientDbId, subject, body, attachments, codAmount);
+        MailSendResult validation = validate(recipientDbId, subject, body, attachments, codAmount,
+                settings.maxPlayerAttachments);
         if (validation != null) return validation;
         String resolvedCodCurrency = codAmount == 0L ? "" : (codCurrency == null || codCurrency.isBlank()
                 ? (wallet == null ? "" : wallet.defaultCurrencyIdentifier()) : codCurrency.trim());
@@ -201,6 +204,17 @@ public final class MailService {
         } catch (SQLException | RuntimeException ex) {
             return MailSendResult.failed(MailResultCode.OPERATION_FAILED, ex.getMessage());
         }
+    }
+
+    public MailSendResult claimSingle(Player player, String mailId) {
+        if (player == null || player.getDbID() <= 0) return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "recipient has no database id");
+        try {
+            MailDatabase.SingleClaimPreparation claim = database.prepareSingleClaim(player.getDbID(), mailId);
+            if (claim == null) return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "mail has no claimable attachment");
+            MailInventoryTransfer.TransferResult transfer = MailInventoryTransfer.restoreAll(player, List.of(claim.attachment()));
+            if (!database.completeSingleClaim(claim, player.getDbID(), transfer.complete())) return MailSendResult.quarantined(claim.mailId(), claim.correlationId(), "single claim state changed");
+            return transfer.complete() ? MailSendResult.completed(claim.mailId(), claim.correlationId()) : MailSendResult.quarantined(claim.mailId(), claim.correlationId(), transfer.detail());
+        } catch (SQLException | RuntimeException ex) { return MailSendResult.failed(MailResultCode.OPERATION_FAILED, ex.getMessage()); }
     }
 
     public MailSendResult returnToSender(Player recipient, String mailId) {
@@ -380,7 +394,7 @@ public final class MailService {
         if (!settings.isTrustedPluginSender(senderPlugin)) {
             return MailSendResult.failed(MailResultCode.PLUGIN_NOT_TRUSTED, "plugin sender is not trusted");
         }
-        MailSendResult validation = validate(recipientDbId, subject, body, attachments, 0L);
+        MailSendResult validation = validate(recipientDbId, subject, body, attachments, 0L, MAX_PLUGIN_ATTACHMENTS);
         if (validation != null) return validation;
         try {
             String correlationId = callerCorrelationId == null || callerCorrelationId.isBlank() ? ""
@@ -413,13 +427,13 @@ public final class MailService {
     }
 
     private MailSendResult validate(int recipientDbId, String subject, String body, List<MailAttachment> attachments,
-            long codAmount) {
+            long codAmount, int attachmentLimit) {
         if (recipientDbId <= 0 || subject == null || body == null || subject.isBlank()
                 || subject.indexOf('<') >= 0 || subject.indexOf('>') >= 0
                 || subject.length() > settings.maxSubjectLength || body.length() > settings.maxBodyLength) {
             return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "message validation failed");
         }
-        if (attachments != null && attachments.size() > settings.maxPlayerAttachments) {
+        if (attachments != null && attachments.size() > attachmentLimit) {
             return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "attachment count limit reached");
         }
         if (codAmount < 0L || (codAmount > 0L && (!settings.enableCod || attachments == null || attachments.isEmpty()))) {

@@ -1,5 +1,11 @@
 # History
 
+## [0.1.20] - 2026-09-15 | Plugin attachment claims
+
+- feat: let recipients claim trusted plugin-delivered attachments one stack at a time.
+- fix: hide the return action for plugin-delivered attachment mail, which cannot be returned to a player sender.
+- fix: restore construction attachment amounts and colors with the PluginAPI argument order.
+
 ## [0.1.19] - 2026-09-14 | Service NPC mail delivery
 
 - fix: trust `OZ - Service NPC` by default so completed service orders can be delivered through OZ Mail.

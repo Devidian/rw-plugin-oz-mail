@@ -499,7 +499,7 @@ public final class MailDatabase {
 
     public Optional<MailDetail> findInboxMail(int recipientDbId, String mailId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT id, subject, body, sender_name, state, created_at, cod_amount, cod_currency,
+                SELECT id, subject, body, sender_name, sender_plugin, state, created_at, cod_amount, cod_currency,
                        EXISTS(SELECT 1 FROM mail_attachments attachment
                               WHERE attachment.mail_id = mail_messages.id AND attachment.custody_state = 'HELD_IN_MAIL') AS has_attachments
                 FROM mail_messages WHERE id = ? AND recipient_db_id = ?
@@ -511,14 +511,15 @@ public final class MailDatabase {
                 return Optional.of(new MailDetail(result.getString("id"), result.getString("subject"),
                         result.getString("body"), result.getString("sender_name"), result.getString("state"),
                         result.getLong("created_at"), result.getBoolean("has_attachments"),
-                        heldAttachments(result.getString("id")), result.getLong("cod_amount"), result.getString("cod_currency")));
+                        heldAttachments(result.getString("id")), result.getLong("cod_amount"), result.getString("cod_currency"),
+                        result.getString("sender_plugin") == null || result.getString("sender_plugin").isBlank()));
             }
         }
     }
 
     public Optional<MailDetail> findOutboxMail(int senderDbId, String mailId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT id, subject, body, recipient_name, state, created_at, cod_amount, cod_currency,
+                SELECT id, subject, body, recipient_name, sender_plugin, state, created_at, cod_amount, cod_currency,
                        EXISTS(SELECT 1 FROM mail_attachments attachment
                               WHERE attachment.mail_id = mail_messages.id AND attachment.custody_state = 'HELD_IN_MAIL') AS has_attachments
                 FROM mail_messages WHERE id = ? AND sender_db_id = ? AND state <> ?
@@ -531,7 +532,8 @@ public final class MailDatabase {
                 return Optional.of(new MailDetail(result.getString("id"), result.getString("subject"),
                         result.getString("body"), result.getString("recipient_name"), result.getString("state"),
                         result.getLong("created_at"), result.getBoolean("has_attachments"),
-                        heldAttachments(result.getString("id")), result.getLong("cod_amount"), result.getString("cod_currency")));
+                        heldAttachments(result.getString("id")), result.getLong("cod_amount"), result.getString("cod_currency"),
+                        result.getString("sender_plugin") == null || result.getString("sender_plugin").isBlank()));
             }
         }
     }
@@ -725,6 +727,57 @@ public final class MailDatabase {
         } finally {
             connection.setAutoCommit(autoCommit);
         }
+    }
+
+    /** Reserves exactly the next held attachment, so plugin deliveries remain claimable item by item. */
+    public SingleClaimPreparation prepareSingleClaim(int recipientDbId, String mailId) throws SQLException {
+        String correlationId = UUID.randomUUID().toString();
+        boolean autoCommit = connection.getAutoCommit(); connection.setAutoCommit(false);
+        try (PreparedStatement select = connection.prepareStatement("""
+                SELECT attachment.id, attachment.item_name, attachment.item_variant, attachment.amount,
+                       attachment.checksum, attachment.durability, attachment.item_status, attachment.item_modifier,
+                       attachment.item_color
+                FROM mail_attachments attachment JOIN mail_messages message ON message.id = attachment.mail_id
+                WHERE attachment.mail_id = ? AND attachment.custody_state = 'HELD_IN_MAIL'
+                  AND message.recipient_db_id = ? AND message.sender_plugin <> '' AND message.cod_amount = 0
+                  AND message.state IN (?, ?, ?)
+                ORDER BY attachment.id LIMIT 1
+                """)) {
+            select.setString(1, mailId); select.setInt(2, recipientDbId);
+            select.setString(3, MailMessageState.DELIVERED.name()); select.setString(4, MailMessageState.READ.name());
+            select.setString(5, MailMessageState.ARCHIVED.name());
+            try (ResultSet result = select.executeQuery()) {
+                if (!result.next()) { connection.rollback(); return null; }
+                long attachmentId = result.getLong(1);
+                MailAttachment attachment = new MailAttachment(result.getString(2), result.getInt(3), result.getInt(4), result.getString(5), result.getInt(6), result.getShort(7), result.getString(8), result.getInt(9));
+                try (PreparedStatement state = connection.prepareStatement("UPDATE mail_attachments SET custody_state='CLAIMING' WHERE id=? AND custody_state='HELD_IN_MAIL'")) {
+                    state.setLong(1, attachmentId); if (state.executeUpdate() != 1) { connection.rollback(); return null; }
+                }
+                try (PreparedStatement op = connection.prepareStatement("INSERT INTO mail_operations(correlation_id,mail_id,operation_type,state,requested_by_db_id,created_at,updated_at) VALUES (?,?,'SINGLE_CLAIM','PREPARED',?,?,?)")) {
+                    long now = System.currentTimeMillis(); op.setString(1, correlationId); op.setString(2, mailId); op.setInt(3, recipientDbId); op.setLong(4, now); op.setLong(5, now); op.executeUpdate();
+                }
+                connection.commit(); return new SingleClaimPreparation(mailId, correlationId, attachmentId, attachment);
+            }
+        } catch (SQLException | RuntimeException ex) { connection.rollback(); throw ex; } finally { connection.setAutoCommit(autoCommit); }
+    }
+
+    public boolean completeSingleClaim(SingleClaimPreparation claim, int recipientDbId, boolean success) throws SQLException {
+        boolean autoCommit = connection.getAutoCommit(); connection.setAutoCommit(false);
+        try {
+            try (PreparedStatement op = connection.prepareStatement("UPDATE mail_operations SET state=?,updated_at=? WHERE correlation_id=? AND mail_id=? AND requested_by_db_id=? AND state='PREPARED'")) {
+                op.setString(1, success ? MailOperationState.COMPLETED.name() : MailOperationState.NEEDS_RECONCILIATION.name());
+                op.setLong(2, System.currentTimeMillis()); op.setString(3, claim.correlationId()); op.setString(4, claim.mailId()); op.setInt(5, recipientDbId);
+                if (op.executeUpdate() != 1) { connection.rollback(); return false; }
+            }
+            try (PreparedStatement attachment = connection.prepareStatement("UPDATE mail_attachments SET custody_state=? WHERE id=? AND mail_id=? AND custody_state='CLAIMING'")) {
+                attachment.setString(1, success ? "CLAIMED" : "QUARANTINED"); attachment.setLong(2, claim.attachmentId()); attachment.setString(3, claim.mailId());
+                if (attachment.executeUpdate() != 1) { connection.rollback(); return false; }
+            }
+            audit(claim.mailId(), claim.correlationId(), "PLAYER", recipientDbId,
+                    success ? "SINGLE_CLAIM_COMPLETED" : "SINGLE_CLAIM_QUARANTINED", success ? "Attachment granted" : "Inventory grant incomplete");
+            connection.commit(); return true;
+        } catch (SQLException | RuntimeException ex) { connection.rollback(); throw ex; }
+        finally { connection.setAutoCommit(autoCommit); }
     }
 
     public int senderForReturn(int recipientDbId, String mailId) throws SQLException {
@@ -1401,6 +1454,10 @@ public final class MailDatabase {
             long codAmount, String codCurrency, MailMessageState sourceState) {
     }
 
+    public record SingleClaimPreparation(String mailId, String correlationId, long attachmentId,
+            MailAttachment attachment) {
+    }
+
     public record ReturnPreparation(String mailId, String correlationId, int senderDbId, int recipientDbId,
             List<MailAttachment> attachments, String actorType, int actorDbId, String eventPrefix) {
     }
@@ -1447,6 +1504,6 @@ public final class MailDatabase {
     }
 
     public record MailDetail(String id, String subject, String body, String counterpartyName, String state, long createdAt,
-            boolean hasAttachments, List<MailAttachment> attachments, long codAmount, String codCurrency) {
+            boolean hasAttachments, List<MailAttachment> attachments, long codAmount, String codCurrency, boolean returnable) {
     }
 }

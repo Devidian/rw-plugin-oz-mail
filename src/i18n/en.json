@@ -239,6 +239,7 @@
       "back": "Back",
       "cancel": "Cancel",
       "claim": "Claim attachments",
+      "claim.next": "Claim next item",
       "cod": {
         "confirm": {
           "$value": "Pay and claim",

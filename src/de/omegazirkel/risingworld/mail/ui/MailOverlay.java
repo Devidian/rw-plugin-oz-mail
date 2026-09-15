@@ -631,14 +631,17 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             body.addChild(archive);
         }
         if (inbox && mail.hasAttachments()) {
-            AdvancedButton claim = AdvancedButtonFactory.defaultButton(t().get("mail.ui.claim", uiPlayer), event -> {
-                if (mail.codAmount() > 0L) showCodClaimConfirmation(mail);
+            String claimLabel = t().get(mail.returnable() ? "mail.ui.claim" : "mail.ui.claim.next", uiPlayer);
+            AdvancedButton claim = AdvancedButtonFactory.defaultButton(claimLabel, event -> {
+                if (!mail.returnable()) claimSingleAttachment(mail.id());
+                else if (mail.codAmount() > 0L) showCodClaimConfirmation(mail);
                 else claimAttachments(mail.id());
             });
             claim.setPivot(Pivot.UpperLeft);
-            claim.setPosition(404, 390, false);
-            claim.setSize(130, 30, false);
+            claim.setPosition(mail.returnable() ? 404 : 300, 390, false);
+            claim.setSize(mail.returnable() ? 130 : 260, 30, false);
             body.addChild(claim);
+            if (mail.returnable()) {
             AdvancedButton returnToSender = AdvancedButtonFactory.defaultButton(t().get("mail.ui.return", uiPlayer), event -> {
                 MailService.MailSendResult result = plugin.returnMailToSender(uiPlayer, mail.id());
                 uiPlayer.sendTextMessage(t().get(resultKey(result), uiPlayer));
@@ -649,6 +652,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             returnToSender.setPosition(546, 390, false);
             returnToSender.setSize(150, 30, false);
             body.addChild(returnToSender);
+            }
         }
         if (inbox && !mail.hasAttachments()) {
             AdvancedButton delete = AdvancedButtonFactory.defaultButton(t().get("mail.ui.delete", uiPlayer), event ->
@@ -868,6 +872,12 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             selectedMailId = null;
             rebuild();
         }
+    }
+
+    private void claimSingleAttachment(String mailId) {
+        MailService.MailSendResult result = plugin.claimSingleMail(uiPlayer, mailId);
+        uiPlayer.sendTextMessage(t().get(result.success() ? "mail.result.claim.success" : resultKey(result), uiPlayer));
+        if (result.success()) rebuild();
     }
 
     private void showCodClaimConfirmation(MailDatabase.MailDetail mail) {

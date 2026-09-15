@@ -79,8 +79,10 @@ public final class MailInventoryTransfer {
             ClothingDefinition clothing = Definitions.getClothingDefinition(attachment.itemName());
             Item added = object != null ? player.getInventory().addObjectItem(object.id, attachment.variant(), attachment.amount())
                     : construction != null
+                            // PluginAPI order: construction id, texture variant,
+                            // stack amount, then custom color.
                             ? player.getInventory().addConstructionItem(construction.id, attachment.variant(),
-                                    attachment.color(), attachment.amount())
+                                    attachment.amount(), attachment.color())
                             : clothing != null
                                     ? player.getInventory().addClothingItem(clothing.id, attachment.variant(), 0,
                                             attachment.amount(), 0L)

@@ -18,6 +18,11 @@ Mail and may probe mailbox capacity before changing external inventory. COD is
 not accepted through this bridge. The request sender name must match the
 consumer plugin's own `plugin.yml` name.
 
+Plugin-originated attachment mails cannot be returned to a player sender. Their
+mail detail instead exposes a one-at-a-time claim action, so a large automated
+delivery can be withdrawn in individual attachment stacks without releasing the
+remaining custody.
+
 ## Operational limits
 
 - `enableCod=false` must remain set until OZ Wallet exposes an atomic,
