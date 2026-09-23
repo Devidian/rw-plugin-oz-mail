@@ -18,10 +18,8 @@ public class MailServicePluginAttachmentTest {
     @Test
     public void trustedAttachmentMailIsDurableAndIdempotent() throws Exception {
         Path pluginDirectory = Files.createTempDirectory("oz-mail-plugin-test");
-        Files.writeString(pluginDirectory.resolve("settings.properties"),
-                "trustedPluginSenders=OZ - Marketplace\nmailboxLimit=20\nmaxPlayerAttachments=5\n");
-        Files.writeString(pluginDirectory.resolve("settings.default.properties"),
-                "trustedPluginSenders=\nmailboxLimit=20\nmaxPlayerAttachments=5\n");
+        Files.writeString(pluginDirectory.resolve("settings.default.json"),
+                "{\"general\":{\"trustedPluginSenders\":[\"OZ - Marketplace\"],\"mailboxLimit\":20,\"maxPlayerAttachments\":5}}");
 
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
             MailDatabase database = new MailDatabase(connection);
@@ -51,10 +49,8 @@ public class MailServicePluginAttachmentTest {
     @Test
     public void trustedPluginSendersUseMultilineAdminField() throws Exception {
         Path pluginDirectory = Files.createTempDirectory("oz-mail-settings-test");
-        Files.writeString(pluginDirectory.resolve("settings.properties"),
-                "trustedPluginSenders=OZ - Land Claim,OZ - Marketplace\n");
-        Files.writeString(pluginDirectory.resolve("settings.default.properties"),
-                "trustedPluginSenders=OZ - Land Claim,OZ - Marketplace\n");
+        Files.writeString(pluginDirectory.resolve("settings.default.json"),
+                "{\"general\":{\"trustedPluginSenders\":[\"OZ - Land Claim\",\"OZ - Marketplace\"]}}");
 
         MailSettings settings = MailSettings.load(new TestPlugin(pluginDirectory));
         assertEquals(AdminSettingsType.TEXT, settings.adminSettingsEntries().stream()

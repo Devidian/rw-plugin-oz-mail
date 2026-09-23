@@ -1,5 +1,9 @@
 # History
 
+## [0.2.0] - 2026-09-23 | JSON-only settings runtime
+
+- change: use world-scoped JSON settings only; transfer legacy Properties values manually.
+
 ## [0.1.20] - 2026-09-15 | Plugin attachment claims
 
 - feat: let recipients claim trusted plugin-delivered attachments one stack at a time.

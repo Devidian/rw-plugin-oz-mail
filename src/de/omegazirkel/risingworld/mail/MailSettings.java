@@ -70,11 +70,7 @@ public final class MailSettings {
     public static MailSettings load(Plugin plugin) throws IOException {
         Path settings = JsonSettingsFile.worldSettingsFile(plugin.getPath() == null ? "." : plugin.getPath());
         Path defaults = settings.resolveSibling("settings.default.json");
-        Path legacy = settings.resolveSibling("settings.properties");
-        JsonSettingsFile.migrateLegacyProperties(legacy, settings);
-        if (Files.notExists(settings) && Files.exists(defaults))
-            JsonSettingsFile.copyAtomically(defaults, settings);
-        JsonSettingsFile.normalizePaths(settings);
+        JsonSettingsFile.prepareWorldSettings(settings);
         JsonSettingsFile.migrateCsvToArray(settings, "general.trustedPluginSenders");
         return new MailSettings(settings, defaults, read(settings), read(defaults));
     }
@@ -141,18 +137,7 @@ public final class MailSettings {
     }
 
     private static Properties read(Path path) throws IOException {
-        if (!path.getFileName().toString().endsWith(".properties")) {
-            Properties properties = JsonSettingsFile.loadProperties(path);
-            JsonSettingsFile.addCompatibilityAliases(properties);
-            return properties;
-        }
-        Properties properties = new Properties();
-        if (Files.exists(path)) {
-            try (FileInputStream input = new FileInputStream(path.toFile())) {
-                properties.load(new InputStreamReader(input, "UTF8"));
-            }
-        }
-        return properties;
+        return JsonSettingsFile.loadProperties(path);
     }
 
     private static int integer(Properties values, Properties defaults, String key, int fallback, int min, int max) {
