@@ -1,5 +1,10 @@
 # History
 
+## [0.2.1] - 2026-09-24 | Mail subject-limit bridge
+
+- feat: expose the active plugin-mail subject limit through the public Mail bridge facade.
+- change: raise the default subject limit from 25 to 50 characters.
+
 ## [0.2.0] - 2026-09-23 | JSON-only settings runtime
 
 - change: use world-scoped JSON settings only; transfer legacy Properties values manually.

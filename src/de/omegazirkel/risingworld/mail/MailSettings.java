@@ -49,7 +49,7 @@ public final class MailSettings {
 
     private void apply(Properties values, Properties defaults) {
         mailboxLimit = integer(values, defaults, "mailboxLimit", 20, 1, 10000);
-        maxSubjectLength = integer(values, defaults, "maxSubjectLength", 25, 1, 500);
+        maxSubjectLength = integer(values, defaults, "maxSubjectLength", 50, 1, 500);
         maxBodyLength = integer(values, defaults, "maxBodyLength", 2500, 1, 20000);
         maxPlayerAttachments = integer(values, defaults, "maxPlayerAttachments", 5, 0, 100);
         sendCooldownSeconds = integer(values, defaults, "sendCooldownSeconds", 30, 0, 86400);

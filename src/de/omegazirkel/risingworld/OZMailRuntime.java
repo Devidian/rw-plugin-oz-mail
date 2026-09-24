@@ -323,6 +323,11 @@ class OZMailRuntime extends Plugin {
         return mailService != null && mailService.canReceivePluginMail(recipientDbId);
     }
 
+    /** Public runtime limit for plugin-originated mail; exposed through MailBridge. */
+    public int getPluginMailMaxSubjectLength() {
+        return settings == null ? 0 : settings.maxSubjectLength;
+    }
+
     public MailService.MailSendResult sendPluginMailWithAttachments(String senderPlugin, int recipientDbId,
             String recipientName, String subject, String body, String callerCorrelationId, String[] itemNames,
             int[] variants, int[] amounts, int[] durabilities, short[] statuses, String[] modifiers, int[] colors) {

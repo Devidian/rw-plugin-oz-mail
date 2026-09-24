@@ -44,6 +44,12 @@ public final class OZMail extends OZMailRuntime implements Listener {
 
     /** Thin public compatibility facade used by the reflection-only Tools bridge. */
     @Override
+    public int getPluginMailMaxSubjectLength() {
+        return super.getPluginMailMaxSubjectLength();
+    }
+
+    /** Thin public compatibility facade used by the reflection-only Tools bridge. */
+    @Override
     public MailService.MailSendResult sendPluginMailWithAttachments(String senderPlugin, int recipientDbId,
             String recipientName, String subject, String body, String callerCorrelationId, String[] itemNames,
             int[] variants, int[] amounts, int[] durabilities, short[] statuses, String[] modifiers, int[] colors) {

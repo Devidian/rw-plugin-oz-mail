@@ -8,7 +8,7 @@ Item custody and COD are introduced only with durable recovery support.
 
 ## Plugin mail bridge
 
-The shared OZ Tools `MailBridge` provides API version 2 for text and trusted
+The shared OZ Tools `MailBridge` provides API version 3 for text and trusted
 plugin-originated attachments. Consumers must use a stable correlation ID;
 repeated requests with the same ID return the original completed result.
 The operator must explicitly list each sender plugin in
@@ -17,6 +17,10 @@ present in the default settings. Attachment callers transfer already-owned custo
 Mail and may probe mailbox capacity before changing external inventory. COD is
 not accepted through this bridge. The request sender name must match the
 consumer plugin's own `plugin.yml` name.
+
+Consumers that construct a subject dynamically must call
+`MailBridge.maxSubjectLength()` and stay within that active server limit. The
+default limit is 50 characters; administrators can change it per world.
 
 Plugin-originated attachment mails cannot be returned to a player sender. Their
 mail detail instead exposes a one-at-a-time claim action, so a large automated

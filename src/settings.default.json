@@ -1,7 +1,7 @@
 {
   "general": {
     "mailboxLimit": 20,
-    "maxSubjectLength": 25,
+    "maxSubjectLength": 50,
     "maxBodyLength": 2500,
     "maxPlayerAttachments": 5,
     "sendCooldownSeconds": 30,
