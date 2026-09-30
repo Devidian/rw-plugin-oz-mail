@@ -24,6 +24,14 @@ public final class MailPlayerPluginSettings extends PlayerPluginSettings {
         return new BasePlayerPluginSettingsPanel(player, pluginLabel) {
             @Override protected void redrawContent() {
                 flexWrapper.removeAllChilds();
+                OZUIElement shortcut = defaultSettingsContainer();
+                shortcut.addChild(defaultSettingsLabel(plugin.text("mail.settings.shortcut", player)));
+                shortcut.addChild(switchButtons(player, MailPlayerPreferences.shortcutVisible(player, pluginLabel), event -> {
+                    MailPlayerPreferences.setShortcutVisible(player, pluginLabel,
+                            !MailPlayerPreferences.shortcutVisible(player, pluginLabel));
+                    redrawContent();
+                }));
+                flexWrapper.addChild(shortcut);
                 OZUIElement announcements = defaultSettingsContainer();
                 announcements.addChild(defaultSettingsLabel(plugin.text("mail.settings.announcements", player)));
                 announcements.addChild(switchButtons(player, MailPlayerPreferences.announcementsEnabled(player), event -> {

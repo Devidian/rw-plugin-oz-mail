@@ -1,5 +1,11 @@
 # History
 
+## Unreleased
+
+## [0.3.0] - 2026-09-30 | Player shortcut visibility
+
+- change: add a per-player Mail shortcut visibility setting.
+
 ## [0.2.1] - 2026-09-24 | Mail subject-limit bridge
 
 - feat: expose the active plugin-mail subject limit through the public Mail bridge facade.

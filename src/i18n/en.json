@@ -142,6 +142,7 @@
       }
     },
     "settings": {
+      "shortcut": "Show Mail shortcut in /ozt and inventory",
       "announcements": "Enable delivery notifications for your mail.",
       "recipient": {
         "window": "Recipient list period in days. The server value is the default.\nCurrent: PH_DAYS days"

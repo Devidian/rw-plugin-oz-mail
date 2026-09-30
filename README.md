@@ -1,5 +1,7 @@
 # OZMail
 
+Players can hide the Mail shortcut in the plugin settings. It remains visible by default.
+
 OZMail is an in-game Rising World mail plugin for messages, recoverable item
 attachments, optional cash on delivery, and plugin-originated mail.
 

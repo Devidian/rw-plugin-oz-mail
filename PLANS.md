@@ -1,5 +1,7 @@
 # Plans
 
+- [ ] Validate the next-300926 change on Development with a controlled player check.
+
 Active implementation work is tracked in [docs/active/](docs/active/).
 
 ## Clothing Item Resolution

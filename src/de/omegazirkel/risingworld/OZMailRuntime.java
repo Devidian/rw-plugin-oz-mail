@@ -276,7 +276,7 @@ class OZMailRuntime extends Plugin {
         mailboxShop.register(settings);
         String pluginName = getDescription("name");
         PluginMenuManager.registerPluginMenu(new MenuItem(pluginName, "oz-mail", "OZMail", p -> gui.openMainMenu(p)));
-        PluginShortcutVisibility.register(pluginName, player -> true);
+        PluginShortcutVisibility.register(pluginName, player -> MailPlayerPreferences.shortcutVisible(player, pluginName));
         InventoryOverlayButtons.registerButton(pluginName, "OZMail", "oz-mail", event -> gui.openMainMenu(event.getPlayer()));
         SharedIndicators.registerProvider(pluginName, new SharedIndicatorProvider() {
             @Override public boolean showIndicator(Player player) { return false; }

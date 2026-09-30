@@ -3,6 +3,8 @@ package de.omegazirkel.risingworld.mail.ui;
 import de.omegazirkel.risingworld.OZMail;
 import de.omegazirkel.risingworld.OZTools;
 import de.omegazirkel.risingworld.tools.PlayerSettings;
+import de.omegazirkel.risingworld.tools.ui.InventoryOverlayPanel;
+import de.omegazirkel.risingworld.tools.ui.PluginShortcutVisibility;
 import net.risingworld.api.objects.Player;
 
 /** Player-owned mail preferences live in the shared OZTools settings store. */
@@ -12,6 +14,19 @@ public final class MailPlayerPreferences {
     private static final String RECIPIENT_WINDOW_DAYS_KEY = "ozmail.recipients.window-days";
 
     private MailPlayerPreferences() { }
+
+    public static boolean shortcutVisible(Player player, String pluginName) {
+        PlayerSettings store = OZTools.playerSettings();
+        return player == null || store == null
+                || store.getBoolean(player.getDbID(), PluginShortcutVisibility.playerSettingKey(pluginName)).orElse(true);
+    }
+
+    public static void setShortcutVisible(Player player, String pluginName, boolean visible) {
+        PlayerSettings store = OZTools.playerSettings();
+        if (player == null || store == null) return;
+        store.setBoolean(player.getDbID(), PluginShortcutVisibility.playerSettingKey(pluginName), visible);
+        InventoryOverlayPanel.refreshAllVisible();
+    }
 
     public static boolean announcementsEnabled(Player player) {
         PlayerSettings store = OZTools.playerSettings();

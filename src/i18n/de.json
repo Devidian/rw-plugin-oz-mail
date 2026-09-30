@@ -142,6 +142,7 @@
       }
     },
     "settings": {
+      "shortcut": "Mail-Shortcut in /ozt und Inventar anzeigen",
       "announcements": "Zustellhinweise für deine Mail aktivieren.",
       "recipient": {
         "window": "Zeitraum der Empfängerliste in Tagen. Der Serverwert ist der Standard.\nAktuell: PH_DAYS Tage"
