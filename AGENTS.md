@@ -1,7 +1,7 @@
 # OZMail Agent Rules
 
 OZMail owns mail state, attachment custody, mail audit/reconciliation, and its
-public mail bridge. It is a standalone Java 20 Maven plugin.
+public mail bridge. It is a standalone Java 25 Maven plugin.
 
 - OZ Tools is the hard dependency for shared runtime infrastructure.
 - Wallet owns balances and transactions. OZMail may call only Wallet public APIs.

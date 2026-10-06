@@ -1,5 +1,7 @@
 # OZMail
 
+**Build baseline:** JDK 25 (`--release 25`) and the bundled Rising World PluginAPI 0.9.3.2 JAR.
+
 Players can hide the Mail shortcut in the plugin settings. It remains visible by default.
 
 OZMail is an in-game Rising World mail plugin for messages, recoverable item

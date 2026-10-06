@@ -2,7 +2,7 @@
 
 ## Runtime Policy
 
-- Java 20 is the plugin baseline.
+- Java 25 is the plugin baseline.
 - Preserve standalone Maven packaging and GitHub tag-release behavior.
 - Keep durable mail state, custody, audit, and recovery compatible.
 
