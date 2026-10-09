@@ -26,6 +26,7 @@
       },
       "claim": {
         "completed": "Abholung abgeschlossen",
+        "payment": {"rejected": "Zahlung bei der Abholung abgelehnt"},
         "prepared": "Abholung vorbereitet",
         "quarantined": "Abholung zur Prüfung quarantänisiert"
       },
@@ -49,6 +50,7 @@
       },
       "return": {
         "completed": "Rückgabe abgeschlossen",
+        "mail": {"completed": "Rücksendung abgeschlossen", "delivered": "Rücksendung zugestellt"},
         "prepared": "Rückgabe vorbereitet",
         "quarantined": "Rückgabe zur Prüfung quarantänisiert"
       },
@@ -57,6 +59,7 @@
         "prepared": "Versand vorbereitet",
         "quarantined": "Versand zur Prüfung quarantänisiert"
       },
+      "single": {"claim": {"completed": "Einzelner Anhang abgeholt", "quarantined": "Einzelner Anhang zur Prüfung quarantänisiert"}},
       "unknown": "Unbekanntes Mail-Ereignis"
     },
     "command": {

@@ -506,7 +506,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     private String auditText(String eventType) {
         String key = enumKey("mail.audit.", eventType);
         String value = t().get(key, uiPlayer);
-        return key.equals(value) ? t().get("mail.audit.unknown", uiPlayer) : value;
+        return key.equals(value) ? t().get("mail.audit.unknown", uiPlayer) + " (" + eventType + ")" : value;
     }
 
     private String auditActorText(String actorType) {

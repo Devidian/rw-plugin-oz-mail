@@ -26,6 +26,7 @@
       },
       "claim": {
         "completed": "Claim completed",
+        "payment": {"rejected": "Claim payment rejected"},
         "prepared": "Claim prepared",
         "quarantined": "Claim quarantined for review"
       },
@@ -49,6 +50,7 @@
       },
       "return": {
         "completed": "Return completed",
+        "mail": {"completed": "Return mail completed", "delivered": "Return mail delivered"},
         "prepared": "Return prepared",
         "quarantined": "Return quarantined for review"
       },
@@ -57,6 +59,7 @@
         "prepared": "Send prepared",
         "quarantined": "Send quarantined for review"
       },
+      "single": {"claim": {"completed": "Single attachment claimed", "quarantined": "Single attachment quarantined for review"}},
       "unknown": "Unknown mail event"
     },
     "command": {

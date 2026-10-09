@@ -9,6 +9,7 @@ attachments, optional cash on delivery, and plugin-originated mail.
 
 It requires OZ Tools. Wallet and Discord Connect integrations are optional.
 Item custody and COD are introduced only with durable recovery support.
+The administrator audit view localizes known event types and includes the event code when a future type has no translation.
 
 ## Plugin mail bridge
 

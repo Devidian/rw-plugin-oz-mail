@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.3.1] - 2026-10-08 | Mail audit labels
+
+- fix: label single-attachment claims, rejected claim payments, and return-mail audit events in DE/EN; show the raw event code for future unknown audit types.
+- build: compile with Java 25 and refresh the bundled Rising World PluginAPI 0.9.3.2 JAR.
+
 ## [0.3.0] - 2026-09-30 | Player shortcut visibility
 
 - change: add a per-player Mail shortcut visibility setting.
