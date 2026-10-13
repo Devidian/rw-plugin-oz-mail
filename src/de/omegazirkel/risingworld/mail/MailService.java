@@ -177,9 +177,14 @@ public final class MailService {
             return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "recipient has no database id");
         }
         try {
+            MailDatabase.CodPaymentInfo cod = database.codPaymentInfo(player.getDbID(), mailId);
+            if (cod != null && cod.amount() > 0L && cod.paid()) {
+                return MailSendResult.failed(MailResultCode.INVALID_REQUEST,
+                        "paid COD mail must be claimed one attachment at a time");
+            }
             MailDatabase.ClaimPreparation claim = database.prepareClaim(player.getDbID(), mailId);
             if (claim == null) return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "mail is not claimable");
-            if (claim.codAmount() > 0L) {
+            if (claim.codAmount() > 0L && !database.isCodPaid(player.getDbID(), mailId)) {
                 WalletBridge.WalletTransferCallResult payment = wallet == null
                         ? new WalletBridge.WalletTransferCallResult(false, "DATABASE_ERROR", "Wallet unavailable")
                         : wallet.transferIdempotent(player.getDbID(), claim.senderDbId(), claim.codAmount(),
@@ -207,9 +212,30 @@ public final class MailService {
     }
 
     public MailSendResult claimSingle(Player player, String mailId) {
+        return claimSingle(player, mailId, -1L);
+    }
+
+    public synchronized MailSendResult claimSingle(Player player, String mailId, long attachmentId) {
         if (player == null || player.getDbID() <= 0) return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "recipient has no database id");
         try {
-            MailDatabase.SingleClaimPreparation claim = database.prepareSingleClaim(player.getDbID(), mailId);
+            MailDatabase.MailDetail detail = database.findInboxMail(player.getDbID(), mailId).orElse(null);
+            if (detail == null || detail.attachmentIds().isEmpty()
+                    || (attachmentId >= 0 && !detail.attachmentIds().contains(attachmentId))) {
+                return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "selected attachment is not claimable");
+            }
+            MailDatabase.CodPaymentInfo cod = database.codPaymentInfo(player.getDbID(), mailId);
+            if (cod == null) return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "mail is not claimable");
+            if (cod.amount() > 0 && !cod.paid()) {
+                WalletBridge.WalletTransferCallResult payment = wallet == null
+                        ? new WalletBridge.WalletTransferCallResult(false, "DATABASE_ERROR", "Wallet unavailable")
+                        : wallet.transferIdempotent(player.getDbID(), cod.senderDbId(), cod.amount(),
+                                "OZMail COD " + mailId, cod.currency(), "OZ - Mail", "mail:cod:" + mailId);
+                if (!payment.success()) return MailSendResult.failed(MailResultCode.PAYMENT_FAILED, payment.message());
+                if (!database.markCodPaid(player.getDbID(), mailId)
+                        && !database.codPaymentInfo(player.getDbID(), mailId).paid())
+                    return MailSendResult.failed(MailResultCode.OPERATION_FAILED, "COD payment state not saved");
+            }
+            MailDatabase.SingleClaimPreparation claim = database.prepareSingleClaim(player.getDbID(), mailId, attachmentId);
             if (claim == null) return MailSendResult.failed(MailResultCode.INVALID_REQUEST, "mail has no claimable attachment");
             MailInventoryTransfer.TransferResult transfer = MailInventoryTransfer.restoreAll(player, List.of(claim.attachment()));
             if (!database.completeSingleClaim(claim, player.getDbID(), transfer.complete())) return MailSendResult.quarantined(claim.mailId(), claim.correlationId(), "single claim state changed");

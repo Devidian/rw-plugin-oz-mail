@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.4.0] - 2026-10-13 | Individual attachment claims
+
+- feat: show selectable attachment images and amounts beside mail content and claim one selected item at a time.
+- fix: charge COD once before the first attachment claim and retain paid mail instead of returning it during expiry handling.
+
 ## [0.3.1] - 2026-10-08 | Mail audit labels
 
 - fix: label single-attachment claims, rejected claim payments, and return-mail audit events in DE/EN; show the raw event code for future unknown audit types.

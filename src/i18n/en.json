@@ -168,6 +168,7 @@
       "runtime": "Mailbox usage: PH_MAILBOX_USED / PH_MAILBOX_CAPACITY\nExtra mailboxes: PH_EXTRA_MAILBOXES\nAttachments per player mail: PH_ATTACHMENTS\nCash on delivery enabled: PH_COD"
     },
     "ui": {
+      "take": { "selected": "Take selected" },
       "admin": {
         "age": {
           "minutes": "PH_MINUTES min"

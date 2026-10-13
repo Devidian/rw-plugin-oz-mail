@@ -67,7 +67,7 @@ public class MailDatabaseTest {
                 assertEquals(0, result.getInt("item_color"));
             }
             try (var result = statement.executeQuery("PRAGMA user_version")) {
-                assertEquals(4, result.getInt(1));
+            assertEquals(5, result.getInt(1));
             }
         }
     }
@@ -225,7 +225,7 @@ public class MailDatabaseTest {
     }
 
     @Test
-    public void singleClaimRejectsOtherRecipientAndPlayerMail() throws Exception {
+    public void singleClaimRejectsOtherRecipientAndAllowsPlayerMail() throws Exception {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
             MailDatabase database = new MailDatabase(connection);
             MailDatabase.PreparedMail plugin = database.prepareOutgoingMail(0, "OZ - LandClaim", 22, "Recipient",
@@ -236,7 +236,31 @@ public class MailDatabaseTest {
             assertTrue(database.completeSend(player, 11));
 
             assertTrue(database.prepareSingleClaim(99, plugin.mailId()) == null);
-            assertTrue(database.prepareSingleClaim(22, player.mailId()) == null);
+            MailDatabase.SingleClaimPreparation selected = database.prepareSingleClaim(22, player.mailId());
+            assertTrue(selected != null);
+            assertEquals("stone", selected.attachment().itemName());
+        }
+    }
+
+    @Test
+    public void selectedCodAttachmentRequiresOnePaymentAndCannotBeReturnedAfterPayment() throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
+            MailDatabase database = new MailDatabase(connection);
+            MailDatabase.PreparedMail prepared = database.prepareOutgoingMail(11, "Sender", 22, "Recipient",
+                    "COD", "Body", List.of(new MailAttachment("wood", 0, 1, "wood:0:1"),
+                            new MailAttachment("stone", 0, 2, "stone:0:2")), 25L, "OZC", "");
+            assertTrue(database.completeSend(prepared, 11));
+            assertTrue(database.prepareSingleClaim(22, prepared.mailId()) == null);
+            assertEquals(25L, database.codPaymentInfo(22, prepared.mailId()).amount());
+            assertTrue(database.markCodPaid(22, prepared.mailId()));
+            assertFalse(database.markCodPaid(22, prepared.mailId()));
+            List<Long> ids = database.findInboxMail(22, prepared.mailId()).orElseThrow().attachmentIds();
+            MailDatabase.SingleClaimPreparation selected = database.prepareSingleClaim(22, prepared.mailId(), ids.get(1));
+            assertEquals("stone", selected.attachment().itemName());
+            assertTrue(database.completeSingleClaim(selected, 22, true));
+            assertEquals("wood", database.prepareSingleClaim(22, prepared.mailId()).attachment().itemName());
+            assertTrue(database.returnSource(22, prepared.mailId()) == null);
+            assertTrue(database.expiredReturnCandidates(11, System.currentTimeMillis() + 1_000, 10).isEmpty());
         }
     }
 

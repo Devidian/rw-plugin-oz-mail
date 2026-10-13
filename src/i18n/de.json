@@ -168,6 +168,7 @@
       "runtime": "Postfachauslastung: PH_MAILBOX_USED / PH_MAILBOX_CAPACITY\nExtra-Postfächer: PH_EXTRA_MAILBOXES\nAnhänge pro Spieler-Mail: PH_ATTACHMENTS\nNachnahme aktiviert: PH_COD"
     },
     "ui": {
+      "take": { "selected": "Entnehmen" },
       "admin": {
         "age": {
           "minutes": "PH_MINUTES Min."

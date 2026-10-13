@@ -16,7 +16,7 @@ import java.util.Optional;
  * while a SQLite transaction is open; their intent/outcome is journaled here.
  */
 public final class MailDatabase {
-    private static final int SCHEMA_VERSION = 4;
+    private static final int SCHEMA_VERSION = 5;
     private final Connection connection;
 
     public MailDatabase(Connection connection) throws SQLException {
@@ -41,6 +41,7 @@ public final class MailDatabase {
                         state_version INTEGER NOT NULL DEFAULT 0,
                         cod_amount BIGINT NOT NULL DEFAULT 0,
                         cod_currency TEXT NOT NULL DEFAULT '',
+                        cod_paid INTEGER NOT NULL DEFAULT 0,
                         created_at BIGINT NOT NULL,
                         delivered_at BIGINT NOT NULL DEFAULT 0,
                         read_at BIGINT NOT NULL DEFAULT 0,
@@ -69,6 +70,7 @@ public final class MailDatabase {
             ensureColumn(statement, "mail_attachments", "item_modifier", "TEXT NOT NULL DEFAULT ''");
             ensureColumn(statement, "mail_attachments", "item_color", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "mail_messages", "quota_exempt", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "mail_messages", "cod_paid", "INTEGER NOT NULL DEFAULT 0");
             statement.execute("CREATE TABLE IF NOT EXISTS mail_recipient_favorites (owner_db_id INTEGER NOT NULL, "
                     + "recipient_db_id INTEGER NOT NULL, PRIMARY KEY(owner_db_id, recipient_db_id))");
             statement.execute("""
@@ -499,7 +501,7 @@ public final class MailDatabase {
 
     public Optional<MailDetail> findInboxMail(int recipientDbId, String mailId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT id, subject, body, sender_name, sender_plugin, state, created_at, cod_amount, cod_currency,
+                SELECT id, subject, body, sender_name, sender_plugin, state, created_at, cod_amount, cod_currency, cod_paid,
                        EXISTS(SELECT 1 FROM mail_attachments attachment
                               WHERE attachment.mail_id = mail_messages.id AND attachment.custody_state = 'HELD_IN_MAIL') AS has_attachments
                 FROM mail_messages WHERE id = ? AND recipient_db_id = ?
@@ -511,7 +513,8 @@ public final class MailDatabase {
                 return Optional.of(new MailDetail(result.getString("id"), result.getString("subject"),
                         result.getString("body"), result.getString("sender_name"), result.getString("state"),
                         result.getLong("created_at"), result.getBoolean("has_attachments"),
-                        heldAttachments(result.getString("id")), result.getLong("cod_amount"), result.getString("cod_currency"),
+                        heldAttachments(result.getString("id")), heldAttachmentIds(result.getString("id")),
+                        result.getLong("cod_amount"), result.getString("cod_currency"), result.getBoolean("cod_paid"),
                         result.getString("sender_plugin") == null || result.getString("sender_plugin").isBlank()));
             }
         }
@@ -519,7 +522,7 @@ public final class MailDatabase {
 
     public Optional<MailDetail> findOutboxMail(int senderDbId, String mailId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT id, subject, body, recipient_name, sender_plugin, state, created_at, cod_amount, cod_currency,
+                SELECT id, subject, body, recipient_name, sender_plugin, state, created_at, cod_amount, cod_currency, cod_paid,
                        EXISTS(SELECT 1 FROM mail_attachments attachment
                               WHERE attachment.mail_id = mail_messages.id AND attachment.custody_state = 'HELD_IN_MAIL') AS has_attachments
                 FROM mail_messages WHERE id = ? AND sender_db_id = ? AND state <> ?
@@ -532,7 +535,8 @@ public final class MailDatabase {
                 return Optional.of(new MailDetail(result.getString("id"), result.getString("subject"),
                         result.getString("body"), result.getString("recipient_name"), result.getString("state"),
                         result.getLong("created_at"), result.getBoolean("has_attachments"),
-                        heldAttachments(result.getString("id")), result.getLong("cod_amount"), result.getString("cod_currency"),
+                        heldAttachments(result.getString("id")), heldAttachmentIds(result.getString("id")),
+                        result.getLong("cod_amount"), result.getString("cod_currency"), result.getBoolean("cod_paid"),
                         result.getString("sender_plugin") == null || result.getString("sender_plugin").isBlank()));
             }
         }
@@ -622,6 +626,60 @@ public final class MailDatabase {
             }
         }
         return List.copyOf(attachments);
+    }
+
+    private List<Long> heldAttachmentIds(String mailId) throws SQLException {
+        List<Long> ids = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT id FROM mail_attachments WHERE mail_id=? AND custody_state='HELD_IN_MAIL' ORDER BY id
+                """)) {
+            statement.setString(1, mailId);
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) ids.add(result.getLong(1));
+            }
+        }
+        return List.copyOf(ids);
+    }
+
+    public record CodPaymentInfo(int senderDbId, long amount, String currency, boolean paid) { }
+
+    public CodPaymentInfo codPaymentInfo(int recipientDbId, String mailId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT sender_db_id,cod_amount,cod_currency,cod_paid FROM mail_messages
+                WHERE id=? AND recipient_db_id=? AND state IN ('DELIVERED','READ','ARCHIVED')
+                """)) {
+            statement.setString(1, mailId);
+            statement.setInt(2, recipientDbId);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? new CodPaymentInfo(result.getInt(1), result.getLong(2),
+                        result.getString(3), result.getBoolean(4)) : null;
+            }
+        }
+    }
+
+    public boolean markCodPaid(int recipientDbId, String mailId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                UPDATE mail_messages SET cod_paid=1
+                WHERE id=? AND recipient_db_id=? AND cod_paid=0 AND cod_amount>0
+                  AND state IN ('DELIVERED','READ','ARCHIVED')
+                  AND EXISTS(SELECT 1 FROM mail_attachments attachment
+                             WHERE attachment.mail_id=mail_messages.id AND attachment.custody_state='HELD_IN_MAIL')
+                """)) {
+            statement.setString(1, mailId);
+            statement.setInt(2, recipientDbId);
+            return statement.executeUpdate() == 1;
+        }
+    }
+
+    public boolean isCodPaid(int recipientDbId, String mailId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT cod_paid FROM mail_messages WHERE id=? AND recipient_db_id=?")) {
+            statement.setString(1, mailId);
+            statement.setInt(2, recipientDbId);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() && result.getBoolean(1);
+            }
+        }
     }
 
     public boolean archive(int recipientDbId, String mailId) throws SQLException {
@@ -731,6 +789,10 @@ public final class MailDatabase {
 
     /** Reserves exactly the next held attachment, so plugin deliveries remain claimable item by item. */
     public SingleClaimPreparation prepareSingleClaim(int recipientDbId, String mailId) throws SQLException {
+        return prepareSingleClaim(recipientDbId, mailId, -1L);
+    }
+
+    public SingleClaimPreparation prepareSingleClaim(int recipientDbId, String mailId, long selectedAttachmentId) throws SQLException {
         String correlationId = UUID.randomUUID().toString();
         boolean autoCommit = connection.getAutoCommit(); connection.setAutoCommit(false);
         try (PreparedStatement select = connection.prepareStatement("""
@@ -739,13 +801,15 @@ public final class MailDatabase {
                        attachment.item_color
                 FROM mail_attachments attachment JOIN mail_messages message ON message.id = attachment.mail_id
                 WHERE attachment.mail_id = ? AND attachment.custody_state = 'HELD_IN_MAIL'
-                  AND message.recipient_db_id = ? AND message.sender_plugin <> '' AND message.cod_amount = 0
+                  AND message.recipient_db_id = ? AND (message.cod_amount = 0 OR message.cod_paid = 1)
+                  AND (? < 0 OR attachment.id = ?)
                   AND message.state IN (?, ?, ?)
                 ORDER BY attachment.id LIMIT 1
                 """)) {
             select.setString(1, mailId); select.setInt(2, recipientDbId);
-            select.setString(3, MailMessageState.DELIVERED.name()); select.setString(4, MailMessageState.READ.name());
-            select.setString(5, MailMessageState.ARCHIVED.name());
+            select.setLong(3, selectedAttachmentId); select.setLong(4, selectedAttachmentId);
+            select.setString(5, MailMessageState.DELIVERED.name()); select.setString(6, MailMessageState.READ.name());
+            select.setString(7, MailMessageState.ARCHIVED.name());
             try (ResultSet result = select.executeQuery()) {
                 if (!result.next()) { connection.rollback(); return null; }
                 long attachmentId = result.getLong(1);
@@ -887,7 +951,7 @@ public final class MailDatabase {
     public ReturnSource returnSource(int recipientDbId, String mailId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT sender_db_id, sender_name, recipient_name, subject, body FROM mail_messages
-                WHERE id = ? AND recipient_db_id = ? AND state IN (?, ?, ?)
+                WHERE id = ? AND recipient_db_id = ? AND cod_paid = 0 AND state IN (?, ?, ?)
                 """)) {
             statement.setString(1, mailId);
             statement.setInt(2, recipientDbId);
@@ -924,7 +988,7 @@ public final class MailDatabase {
             if (attachments.isEmpty()) { connection.rollback(); return null; }
             try (PreparedStatement message = connection.prepareStatement("""
                     UPDATE mail_messages SET state = ?, state_version = state_version + 1
-                    WHERE id = ? AND recipient_db_id = ? AND sender_db_id = ? AND state IN (?, ?, ?)
+                    WHERE id = ? AND recipient_db_id = ? AND sender_db_id = ? AND cod_paid = 0 AND state IN (?, ?, ?)
                     """)) {
                 message.setString(1, MailMessageState.RETURNING.name());
                 message.setString(2, mailId);
@@ -1155,7 +1219,7 @@ public final class MailDatabase {
         List<ExpiredReturnCandidate> candidates = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT id, recipient_db_id FROM mail_messages
-                WHERE sender_db_id = ? AND created_at <= ? AND state IN (?, ?, ?)
+                WHERE sender_db_id = ? AND created_at <= ? AND cod_paid = 0 AND state IN (?, ?, ?)
                   AND EXISTS(SELECT 1 FROM mail_attachments attachment
                              WHERE attachment.mail_id = mail_messages.id AND attachment.custody_state = 'HELD_IN_MAIL')
                 ORDER BY created_at ASC LIMIT ?
@@ -1504,6 +1568,7 @@ public final class MailDatabase {
     }
 
     public record MailDetail(String id, String subject, String body, String counterpartyName, String state, long createdAt,
-            boolean hasAttachments, List<MailAttachment> attachments, long codAmount, String codCurrency, boolean returnable) {
+            boolean hasAttachments, List<MailAttachment> attachments, List<Long> attachmentIds,
+            long codAmount, String codCurrency, boolean codPaid, boolean returnable) {
     }
 }

@@ -7,6 +7,8 @@ Players can hide the Mail shortcut in the plugin settings. It remains visible by
 OZMail is an in-game Rising World mail plugin for messages, recoverable item
 attachments, optional cash on delivery, and plugin-originated mail.
 
+The mail detail view shows attachments in a right-hand panel. Players select an item and use **Take** to claim it individually. COD is charged once before the first claim; paid COD mail remains with the recipient until its remaining attachments are claimed.
+
 It requires OZ Tools. Wallet and Discord Connect integrations are optional.
 Item custody and COD are introduced only with durable recovery support.
 The administrator audit view localizes known event types and includes the event code when a future type has no translation.

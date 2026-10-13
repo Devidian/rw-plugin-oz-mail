@@ -24,6 +24,9 @@ import net.risingworld.api.ui.style.Pivot;
 import net.risingworld.api.ui.style.Position;
 import net.risingworld.api.ui.style.Unit;
 import net.risingworld.api.ui.UIScrollView.ScrollViewMode;
+import net.risingworld.api.ui.style.ScaleMode;
+import net.risingworld.api.definitions.Definitions;
+import net.risingworld.api.assets.TextureAsset;
 import de.omegazirkel.risingworld.tools.ui.table.TableCell;
 import de.omegazirkel.risingworld.tools.ui.table.TableRow;
 import de.omegazirkel.risingworld.tools.ui.table.TableScrollView;
@@ -69,6 +72,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
     private String composeBody = "";
     private String selectedCodCurrency = "";
     private String selectedMailId;
+    private long selectedAttachmentId = -1L;
     private String selectedAdminMailId;
     private MailDatabase.ReconciliationEntry selectedAdminEntry;
     private String adminOperationFilter = "";
@@ -573,23 +577,12 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         UILabel content = new UILabel(mail.body());
         content.setPivot(Pivot.UpperLeft);
         content.setPosition(18, 82, false);
-        content.setSize(90, 50, true);
+        content.setSize(mail.hasAttachments() ? 62 : 90, 50, true);
         content.setTextWrap(true);
         content.setFontSize(14);
         body.addChild(content);
         if (mail.hasAttachments()) {
-            String attachmentText = mail.attachments().stream()
-                    .map(attachment -> MailInventoryTransfer.displayName(attachment.itemName(), attachment.variant(), uiPlayer.getLanguage())
-                            + " x" + attachment.amount())
-                    .reduce((left, right) -> left + ", " + right).orElse("");
-            UILabel attachments = new UILabel(t().get("mail.ui.detail.attachments", uiPlayer)
-                    .replace("PH_ITEMS", attachmentText));
-            attachments.setPivot(Pivot.UpperLeft);
-            attachments.setPosition(18, 304, false);
-            attachments.setSize(90, 12, true);
-            attachments.setFontSize(13);
-            attachments.setTextWrap(true);
-            body.addChild(attachments);
+            setupDetailAttachments(mail, inbox);
         }
         if (mail.codAmount() > 0L) {
             UILabel cod = new UILabel(t().get("mail.ui.detail.cod", uiPlayer)
@@ -631,17 +624,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
             body.addChild(archive);
         }
         if (inbox && mail.hasAttachments()) {
-            String claimLabel = t().get(mail.returnable() ? "mail.ui.claim" : "mail.ui.claim.next", uiPlayer);
-            AdvancedButton claim = AdvancedButtonFactory.defaultButton(claimLabel, event -> {
-                if (!mail.returnable()) claimSingleAttachment(mail.id());
-                else if (mail.codAmount() > 0L) showCodClaimConfirmation(mail);
-                else claimAttachments(mail.id());
-            });
-            claim.setPivot(Pivot.UpperLeft);
-            claim.setPosition(mail.returnable() ? 404 : 300, 390, false);
-            claim.setSize(mail.returnable() ? 130 : 260, 30, false);
-            body.addChild(claim);
-            if (mail.returnable()) {
+            if (mail.returnable() && !mail.codPaid()) {
             AdvancedButton returnToSender = AdvancedButtonFactory.defaultButton(t().get("mail.ui.return", uiPlayer), event -> {
                 MailService.MailSendResult result = plugin.returnMailToSender(uiPlayer, mail.id());
                 uiPlayer.sendTextMessage(t().get(resultKey(result), uiPlayer));
@@ -874,8 +857,82 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         }
     }
 
-    private void claimSingleAttachment(String mailId) {
-        MailService.MailSendResult result = plugin.claimSingleMail(uiPlayer, mailId);
+    private void setupDetailAttachments(MailDatabase.MailDetail mail, boolean inbox) {
+        OZUIElement panel = new OZUIElement();
+        panel.setPivot(Pivot.UpperRight);
+        panel.setPosition(98, 4, true);
+        panel.setSize(31, 82, true);
+        panel.setBackgroundColor(0.12f, 0.11f, 0.09f, 0.9f);
+        panel.setBorder(1);
+        panel.setBorderColor(0.95f, 0.75f, 0.25f, 0.48f);
+        body.addChild(panel);
+        UILabel title = new UILabel(t().get("mail.ui.attachment", uiPlayer));
+        title.setPivot(Pivot.UpperLeft);
+        title.setPosition(10, 8, false);
+        title.setFontSize(15);
+        panel.addChild(title);
+        if (!mail.attachmentIds().contains(selectedAttachmentId)) selectedAttachmentId = mail.attachmentIds().get(0);
+        UIScrollView scroll = new UIScrollView(ScrollViewMode.Vertical);
+        scroll.setPivot(Pivot.UpperLeft);
+        scroll.setPosition(8, 42, false);
+        scroll.setSize(94, 74, true);
+        panel.addChild(scroll);
+        OZUIElement rows = new OZUIElement();
+        rows.style.width.set(99, Unit.Percent);
+        rows.style.height.set(Math.max(1, mail.attachments().size() * 54), Unit.Pixel);
+        scroll.addChild(rows);
+        for (int i = 0; i < mail.attachments().size(); i++) {
+            MailAttachment attachment = mail.attachments().get(i);
+            long id = mail.attachmentIds().get(i);
+            String label = MailInventoryTransfer.displayName(attachment.itemName(), attachment.variant(), uiPlayer.getLanguage())
+                    + " x" + attachment.amount();
+            AdvancedButton row = AdvancedButtonFactory.defaultButton(label, event -> {
+                selectedAttachmentId = id;
+                rebuild();
+            });
+            row.setPivot(Pivot.UpperLeft);
+            row.setPosition(2, 2 + i * 54, false);
+            row.style.width.set(96, Unit.Percent);
+            row.style.height.set(48, Unit.Pixel);
+            if (id == selectedAttachmentId) row.setBorderColor(0.95f, 0.75f, 0.25f, 0.95f);
+            TextureAsset icon = attachmentIcon(attachment);
+            if (icon != null) {
+                OZUIElement image = new OZUIElement();
+                image.setPivot(Pivot.UpperLeft);
+                image.setPosition(4, 4, false);
+                image.setSize(40, 40, false);
+                image.style.backgroundImage.set(icon);
+                image.style.backgroundImageScaleMode.set(ScaleMode.ScaleToFit);
+                row.addChild(image);
+            }
+            rows.addChild(row);
+        }
+        if (inbox) {
+            AdvancedButton take = AdvancedButtonFactory.defaultButton(t().get("mail.ui.take.selected", uiPlayer), event -> {
+                if (mail.codAmount() > 0L && !mail.codPaid()) showCodClaimConfirmation(mail);
+                else claimSingleAttachment(mail.id(), selectedAttachmentId);
+            });
+            take.setPivot(Pivot.LowerCenter);
+            take.setPosition(50, 98, true);
+            take.style.width.set(90, Unit.Percent);
+            take.style.height.set(32, Unit.Pixel);
+            panel.addChild(take);
+        }
+    }
+
+    private TextureAsset attachmentIcon(MailAttachment attachment) {
+        var item = Definitions.getItemDefinition(attachment.itemName());
+        if (item != null) return item.getIcon(attachment.variant());
+        var object = Definitions.getObjectDefinition(attachment.itemName());
+        if (object != null) return object.getIcon(attachment.variant());
+        var clothing = Definitions.getClothingDefinition(attachment.itemName());
+        if (clothing != null) return clothing.getIcon(attachment.variant());
+        var construction = Definitions.getConstructionDefinition(attachment.itemName());
+        return construction == null ? null : construction.getIcon(attachment.variant());
+    }
+
+    private void claimSingleAttachment(String mailId, long attachmentId) {
+        MailService.MailSendResult result = plugin.claimSingleMail(uiPlayer, mailId, attachmentId);
         uiPlayer.sendTextMessage(t().get(result.success() ? "mail.result.claim.success" : resultKey(result), uiPlayer));
         if (result.success()) rebuild();
     }
@@ -911,7 +968,7 @@ public final class MailOverlay extends BasePluginOverlayWithTabs {
         dialog.addChild(cancel);
         AdvancedButton confirm = AdvancedButtonFactory.defaultButton(t().get("mail.ui.cod.confirm", uiPlayer), event -> {
             uiPlayer.removeUIElement(dialog);
-            claimAttachments(mail.id());
+            claimSingleAttachment(mail.id(), selectedAttachmentId);
         });
         confirm.setPivot(Pivot.UpperRight);
         confirm.setPosition(496, 164, false);

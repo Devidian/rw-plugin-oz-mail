@@ -155,6 +155,10 @@ class OZMailRuntime extends Plugin {
     public MailService.MailSendResult claimSingleMail(Player player, String mailId) {
         return mailService == null ? MailService.MailSendResult.failed(MailResultCode.DATABASE_UNAVAILABLE, "OZMail unavailable") : mailService.claimSingle(player, mailId);
     }
+    public MailService.MailSendResult claimSingleMail(Player player, String mailId, long attachmentId) {
+        return mailService == null ? MailService.MailSendResult.failed(MailResultCode.DATABASE_UNAVAILABLE, "OZMail unavailable")
+                : mailService.claimSingle(player, mailId, attachmentId);
+    }
 
     public MailService.MailSendResult returnMailToSender(Player player, String mailId) {
         return mailService == null
