@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.4.1] - 2026-10-14 | Clothing labels
+
 - fix: show the localized concrete clothing definition in the attachment inventory list without changing attachment identity or delivery.
 
 ## [0.4.0] - 2026-10-13 | Individual attachment claims
