@@ -42,6 +42,8 @@ remaining custody.
   administrators; they are never retried automatically.
 - Clothing attachments retain their concrete `ClothingItem` definition name
   (for example `mininghelmet`) for labels, custody checks, and restoration.
+  The inventory attachment picker resolves the localized name from that concrete
+  clothing definition before the item is attached.
 - Construction attachments retain their concrete `ConstructionItem` definition
   name, texture variant, and custom color for labels, custody checks, and
   restoration.

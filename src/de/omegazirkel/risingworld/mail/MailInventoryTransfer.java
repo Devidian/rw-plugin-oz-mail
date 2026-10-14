@@ -129,9 +129,13 @@ public final class MailInventoryTransfer {
     }
 
     private static AttachmentCandidate snapshot(String itemName, Item item, String language) {
-        String localizedName = MailItemNames.objectDefinition(itemName, item.getVariant()) == null
-                ? item.getLocalizedName(language)
-                : MailItemNames.localizedName(itemName, item.getVariant(), language);
+        ClothingDefinition clothing = item instanceof Item.ClothingItem
+                ? Definitions.getClothingDefinition(itemName) : null;
+        String localizedName = clothing == null ? null : clothing.getLocalizedName(language);
+        if (localizedName == null || localizedName.isBlank()) localizedName =
+                MailItemNames.objectDefinition(itemName, item.getVariant()) == null
+                        ? item.getLocalizedName(language)
+                        : MailItemNames.localizedName(itemName, item.getVariant(), language);
         if (localizedName == null || localizedName.isBlank()) localizedName = item.getLocalizedName(language);
         String displayName = localizedName == null || localizedName.isBlank()
                 ? MailItemNames.label(itemName, item.getVariant())

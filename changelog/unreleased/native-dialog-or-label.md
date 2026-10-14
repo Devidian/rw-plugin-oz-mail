@@ -1,0 +1,1 @@
+- fix: show concrete localized clothing names in the mail attachment inventory list.

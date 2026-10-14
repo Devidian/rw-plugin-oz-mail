@@ -4,6 +4,8 @@
 
 Active implementation work is tracked in [docs/active/](docs/active/).
 
+- [Clothing inventory labels](docs/active/mail-clothing-list-label.md)
+
 ## Clothing Item Resolution
 
 - [x] Store concrete clothing definition names in new attachments

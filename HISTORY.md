@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- fix: show the localized concrete clothing definition in the attachment inventory list without changing attachment identity or delivery.
+
 ## [0.4.0] - 2026-10-13 | Individual attachment claims
 
 - feat: show selectable attachment images and amounts beside mail content and claim one selected item at a time.
