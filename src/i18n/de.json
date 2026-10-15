@@ -371,6 +371,7 @@
   },
   "tc": {
     "setting": {
+      "discordauditthreadtopic": {"label": "Discord-Audit-Thread", "desc": "Leer verwendet den Plugin-Namen. Gleicher Kanal und Thread-Titel nutzen denselben Thread."},
       "attachmentexpirydays": {
         "desc": "Tage bis zur Rückgabe abgelaufener Anhänge.",
         "label": "Anhang-Ablauf"

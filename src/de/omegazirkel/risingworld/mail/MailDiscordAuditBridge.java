@@ -8,7 +8,8 @@ public final class MailDiscordAuditBridge {
     private MailDiscordAuditBridge() {
     }
 
-    public static boolean send(Plugin owner, long channelId, String message) {
-        return new DiscordBridge(owner).sendTextMessage(message, channelId);
+    public static boolean send(Plugin owner, long channelId, String message, String topic) {
+        return new DiscordBridge(owner).sendTextMessage(message, channelId, null,
+                topic == null || topic.isBlank() ? owner.getDescription("name") : topic.trim());
     }
 }

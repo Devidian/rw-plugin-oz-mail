@@ -196,7 +196,7 @@ class OZMailRuntime extends Plugin {
                     ? "mail.discord.audit.send.held" : "mail.discord.audit.send.returned";
             MailDiscordAuditBridge.send(this, settings.discordAuditChannelId,
                     translations.get(key, admin).replace("PH_MAIL_ID", findMailIdByReference(admin, correlationId)
-                            .orElse(correlationId)));
+                            .orElse(correlationId)), settings.discordAuditThreadTopic);
         }
         return resolved;
     }

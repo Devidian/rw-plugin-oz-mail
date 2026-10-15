@@ -371,6 +371,7 @@
   },
   "tc": {
     "setting": {
+      "discordauditthreadtopic": {"label": "Discord audit thread", "desc": "Blank uses the plugin display name. The same channel and thread name reuse one thread."},
       "attachmentexpirydays": {
         "desc": "Days before expired attachments are returned.",
         "label": "Attachment expiry"

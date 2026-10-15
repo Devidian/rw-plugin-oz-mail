@@ -32,6 +32,7 @@
     "extraMailboxShopOffer": true
   },
   "discord": {
-    "auditChannelId": 0
+    "auditChannelId": 0,
+    "auditThreadTopic": ""
   }
 }

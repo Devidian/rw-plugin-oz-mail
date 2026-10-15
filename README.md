@@ -84,3 +84,7 @@ already present on the server. Use `mvn clean package` for a fresh local
 package; ZIP assembly also excludes stale legacy settings and translations.
 
 Object-kit inventory selections use the localized object name. Selected and received attachment summaries follow the viewing player’s language.
+
+## Discord event threads
+
+Existing Discord event channel IDs remain in effect. Each route also accepts an optional thread topic: `discordAuditThreadTopic` for the Discord audit channel. Leave a topic blank to use the plugin display name from `plugin.yml`. Matching topics in the same parent channel share one thread. Topic routing requires compatible OZ Tools and Discord Connect with the bot enabled; an older Discord Connect logs a failure and does not send the event to the parent channel. Install OZ Tools, then Discord Connect, then this plugin.

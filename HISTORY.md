@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [0.4.2] - 2026-10-15 | Discord event threads
+
+- feat: Route Discord mail audit events into a configurable thread.
+
 ## [0.4.1] - 2026-10-14 | Clothing labels
 
 - fix: show the localized concrete clothing definition in the attachment inventory list without changing attachment identity or delivery.

@@ -32,6 +32,7 @@ public final class MailSettings {
     public boolean enableCod;
     public boolean enableWelcomeMessage;
     public long discordAuditChannelId;
+    public String discordAuditThreadTopic;
     public boolean enableExtraMailboxShopOffer;
     public long extraMailboxBasePrice;
     public double extraMailboxPriceIncreaseFactor;
@@ -59,6 +60,8 @@ public final class MailSettings {
         enableCod = bool(values, defaults, "enableCod", false);
         enableWelcomeMessage = bool(values, defaults, "enableWelcomeMessage", false);
         discordAuditChannelId = longValue(values, defaults, "discordAuditChannelId", 0L, 0L, Long.MAX_VALUE);
+        discordAuditThreadTopic = values.getProperty("discordAuditThreadTopic",
+                defaults.getProperty("discordAuditThreadTopic", ""));
         enableExtraMailboxShopOffer = bool(values, defaults, "enableExtraMailboxShopOffer", true);
         extraMailboxBasePrice = longValue(values, defaults, "extraMailboxBasePrice", 1000L, 0L, Long.MAX_VALUE);
         extraMailboxPriceIncreaseFactor = decimal(values, defaults, "extraMailboxPriceIncreaseFactor", 1d, 1d, 100d);
@@ -108,6 +111,8 @@ public final class MailSettings {
                 AdminSettingsEntry.group("discord", "Discord", "Optionale Auditweiterleitung ohne Mailinhalte; Kanal 0 deaktiviert sie. / Optional audit forwarding without mail contents; channel 0 disables it."),
                 entry("discordAuditChannelId", "Discord-Audit-Kanal / Discord audit channel",
                         "Discord-Kanal-ID; 0 deaktiviert die Weiterleitung. / Discord channel ID; 0 disables forwarding.", AdminSettingsType.STRING),
+                entry("discordAuditThreadTopic", "Discord-Audit-Thread / Discord audit thread",
+                        "Leer verwendet den Plugin-Namen. / Blank uses the plugin display name.", AdminSettingsType.STRING),
                 AdminSettingsEntry.group("extraMailbox", "Extra-Postfächer / Extra mailboxes",
                         "Shop-Angebot für zusätzliche Postfachkapazität. / Shop offer for additional mailbox capacity."),
                 entry("enableExtraMailboxShopOffer", "Extra-Postfach-Angebot / Extra mailbox offer",

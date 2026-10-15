@@ -24,3 +24,5 @@ Active implementation work is tracked in [docs/active/](docs/active/).
 - [x] Add API v2 capacity and attachment endpoints
 - [x] Preserve correlation-id idempotency and trusted-sender validation
 - [x] Complete development-server Marketplace delivery acceptance
+
+Discord event thread routing is implemented locally; Development Discord validation and the separately authorized release remain open. Configuration is documented in README.md.
