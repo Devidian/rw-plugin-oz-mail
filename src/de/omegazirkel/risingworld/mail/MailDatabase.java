@@ -112,8 +112,68 @@ public final class MailDatabase {
         statement.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);
     }
 
+    public synchronized boolean playerErasureReady(int playerDbId) {
+        try {
+            return !playerErasureHasUnsettledMail(playerDbId);
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
+
+    private boolean playerErasureHasUnsettledMail(int playerDbId) throws SQLException {
+        try (var statement = connection.prepareStatement("""
+                SELECT 1 FROM mail_messages m
+                WHERE (m.sender_db_id = ?1 OR m.recipient_db_id = ?1)
+                  AND (
+                    EXISTS (SELECT 1 FROM mail_operations o WHERE o.mail_id = m.id
+                            AND o.state NOT IN ('COMPLETED', 'COMPENSATED'))
+                    OR EXISTS (SELECT 1 FROM mail_attachments a WHERE a.mail_id = m.id
+                               AND a.custody_state = 'HELD_IN_MAIL'
+                               AND (m.recipient_db_id = ?1 OR (m.cod_amount > 0 AND m.cod_paid = 0)))
+                  )
+                LIMIT 1
+                """)) {
+            statement.setInt(1, playerDbId);
+            try (var result = statement.executeQuery()) { return result.next(); }
+        }
+    }
+
+    /** Preserves shared mail and free texts while neutralizing structured player references. */
+    public synchronized boolean erasePlayerData(int playerDbId) throws SQLException {
+        if (playerDbId <= 0) throw new IllegalArgumentException("Player DBID must be positive");
+        boolean autoCommit = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+        try {
+            if (playerErasureHasUnsettledMail(playerDbId)) {
+                connection.rollback();
+                return false;
+            }
+            for (String sql : List.of(
+                    "UPDATE mail_messages SET sender_db_id = 0, sender_name = '' WHERE sender_db_id = ?1",
+                    "UPDATE mail_messages SET recipient_db_id = 0, recipient_name = '' WHERE recipient_db_id = ?1",
+                    "UPDATE mail_operations SET requested_by_db_id = 0 WHERE requested_by_db_id = ?1",
+                    "UPDATE mail_audit_events SET actor_db_id = 0 WHERE actor_db_id = ?1 AND actor_type IN ('PLAYER', 'ADMIN')",
+                    "DELETE FROM mail_recipient_favorites WHERE owner_db_id = ?1 OR recipient_db_id = ?1",
+                    "DELETE FROM mail_extra_mailboxes WHERE player_db_id = ?1")) {
+                try (var statement = connection.prepareStatement(sql)) {
+                    statement.setInt(1, playerDbId);
+                    statement.executeUpdate();
+                }
+            }
+            connection.commit();
+            return true;
+        } catch (SQLException | RuntimeException ex) {
+            connection.rollback();
+            throw ex;
+        } finally {
+            connection.setAutoCommit(autoCommit);
+        }
+    }
+
     public boolean toggleRecipientFavorite(int ownerDbId, int recipientDbId) throws SQLException {
         if (ownerDbId <= 0 || recipientDbId <= 0 || ownerDbId == recipientDbId) return false;
+        if (de.omegazirkel.risingworld.tools.privacy.PlayerErasureService.isPending(ownerDbId)
+                || de.omegazirkel.risingworld.tools.privacy.PlayerErasureService.isPending(recipientDbId)) return false;
         try (PreparedStatement lookup = connection.prepareStatement("SELECT 1 FROM mail_recipient_favorites "
                 + "WHERE owner_db_id = ? AND recipient_db_id = ?")) {
             lookup.setInt(1, ownerDbId);
@@ -171,6 +231,10 @@ public final class MailDatabase {
             String senderPlugin, String requestedCorrelationId, boolean quotaExempt) throws SQLException {
         if (senderDbId < 0 || recipientDbId <= 0 || subject == null || body == null || codAmount < 0) {
             throw new IllegalArgumentException("invalid outgoing mail");
+        }
+        if (de.omegazirkel.risingworld.tools.privacy.PlayerErasureService.isPending(recipientDbId)
+                || (senderDbId > 0 && de.omegazirkel.risingworld.tools.privacy.PlayerErasureService.isPending(senderDbId))) {
+            throw new SQLException("Mail unavailable during player erasure");
         }
         String mailId = UUID.randomUUID().toString();
         String correlationId = requestedCorrelationId == null || requestedCorrelationId.isBlank()

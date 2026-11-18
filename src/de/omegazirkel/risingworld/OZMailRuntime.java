@@ -49,6 +49,7 @@ import net.risingworld.api.objects.Player;
 
 /** Entry point for the OZMail plugin. Durable mail workflows are added in later slices. */
 class OZMailRuntime extends Plugin {
+    private de.omegazirkel.risingworld.tools.privacy.PlayerErasureService.Registration erasureRegistration;
     static final String COMMAND = "ozmail";
     private static final String LOGGER_NAME = "OZMail";
     private I18n translations;
@@ -271,6 +272,8 @@ class OZMailRuntime extends Plugin {
             if (quarantined > 0) {
                 logger().warn("Quarantined " + quarantined + " unfinished OZMail operation(s) for reconciliation");
             }
+            erasureRegistration = de.omegazirkel.risingworld.tools.privacy.PlayerErasureService.register(
+                    "mail", database::playerErasureReady, request -> database.erasePlayerData(request.playerDbId()));
         } catch (SQLException | java.io.IOException ex) {
             logger().error("Could not initialize the OZMail database: " + ex.getMessage());
             return;
@@ -363,6 +366,7 @@ class OZMailRuntime extends Plugin {
 
     @Override
     public void onDisable() {
+        if (erasureRegistration != null) erasureRegistration.close();
         String pluginName = getDescription("name");
         InventoryOverlayButtons.unregisterButtons(pluginName);
         PluginShortcutVisibility.unregister(pluginName);

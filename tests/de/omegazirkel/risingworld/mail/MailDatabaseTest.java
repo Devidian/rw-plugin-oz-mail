@@ -15,6 +15,26 @@ import org.junit.Test;
 
 public class MailDatabaseTest {
     @Test
+    public void erasurePreservesDeliveredFreeTextAndWaitsForUnsettledMail() throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
+            MailDatabase database = new MailDatabase(connection);
+            new MailboxCapacityService(connection);
+            var mail = database.prepareOutgoingMail(11, "Sender", 22, "Recipient",
+                    "Subject", "Shared body", List.of(), 0L, "", "");
+            assertFalse(database.playerErasureReady(11));
+            assertFalse(database.erasePlayerData(11));
+            assertTrue(database.completeSend(mail, 11));
+            assertTrue(database.toggleRecipientFavorite(22, 11));
+            assertTrue(database.erasePlayerData(11));
+            assertTrue(database.erasePlayerData(11));
+            var retained = database.findInboxMail(22, mail.mailId()).orElseThrow();
+            assertEquals("", retained.counterpartyName());
+            assertEquals("Shared body", retained.body());
+            assertTrue(database.recipientFavoriteIds(22).isEmpty());
+        }
+    }
+
+    @Test
     public void constructionColorRoundTripsThroughAttachmentPersistence() throws Exception {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
             MailDatabase database = new MailDatabase(connection);
