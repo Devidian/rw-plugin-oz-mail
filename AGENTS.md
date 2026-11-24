@@ -16,3 +16,7 @@ public mail bridge. It is a standalone Java 25 Maven plugin.
   events/settings, and expose thin compatibility facades; mail workflows,
   custody, persistence, UI, integrations, and timers belong in thematic
   classes.
+
+## CodeMap
+
+For unfamiliar modules and cross-repository impact, start at [the local CodeMap](.codemap/README.md) and use the [CodeMap skill](.agents/skills/codemap/SKILL.md). Verify relevant source and update and validate affected entries when indexed information changes.
