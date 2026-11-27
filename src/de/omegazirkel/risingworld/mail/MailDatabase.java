@@ -577,7 +577,7 @@ public final class MailDatabase {
                 return Optional.of(new MailDetail(result.getString("id"), result.getString("subject"),
                         result.getString("body"), result.getString("sender_name"), result.getString("state"),
                         result.getLong("created_at"), result.getBoolean("has_attachments"),
-                        heldAttachments(result.getString("id")), heldAttachmentIds(result.getString("id")),
+                        attachments(result.getString("id"), "HELD_IN_MAIL"), heldAttachmentIds(result.getString("id")),
                         result.getLong("cod_amount"), result.getString("cod_currency"), result.getBoolean("cod_paid"),
                         result.getString("sender_plugin") == null || result.getString("sender_plugin").isBlank()));
             }
@@ -599,7 +599,7 @@ public final class MailDatabase {
                 return Optional.of(new MailDetail(result.getString("id"), result.getString("subject"),
                         result.getString("body"), result.getString("recipient_name"), result.getString("state"),
                         result.getLong("created_at"), result.getBoolean("has_attachments"),
-                        heldAttachments(result.getString("id")), heldAttachmentIds(result.getString("id")),
+                        attachments(result.getString("id"), "HELD_IN_MAIL"), heldAttachmentIds(result.getString("id")),
                         result.getLong("cod_amount"), result.getString("cod_currency"), result.getBoolean("cod_paid"),
                         result.getString("sender_plugin") == null || result.getString("sender_plugin").isBlank()));
             }
@@ -670,26 +670,6 @@ public final class MailDatabase {
 
     public boolean markRead(int recipientDbId, String mailId) throws SQLException {
         return updateRecipientState(recipientDbId, mailId, MailMessageState.DELIVERED, MailMessageState.READ, "read_at");
-    }
-
-    private List<MailAttachment> heldAttachments(String mailId) throws SQLException {
-        List<MailAttachment> attachments = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT item_name, item_variant, amount, checksum, durability, item_status, item_modifier, item_color
-                FROM mail_attachments
-                WHERE mail_id = ? AND custody_state = 'HELD_IN_MAIL' ORDER BY id ASC
-                """)) {
-            statement.setString(1, mailId);
-            try (ResultSet result = statement.executeQuery()) {
-                while (result.next()) {
-                    attachments.add(new MailAttachment(result.getString("item_name"), result.getInt("item_variant"),
-                            result.getInt("amount"), result.getString("checksum"), result.getInt("durability"),
-                            result.getShort("item_status"), result.getString("item_modifier"),
-                            result.getInt("item_color")));
-                }
-            }
-        }
-        return List.copyOf(attachments);
     }
 
     private List<Long> heldAttachmentIds(String mailId) throws SQLException {
