@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [0.4.4] - 2026-11-27 | Attachment custody reads
+
+- Mail now uses one attachment reader for held items when listing and processing messages. It preserves attachment order, custody checks and the existing database transaction.
+
 ## [0.4.2] - 2026-10-15 | Discord event threads
 
 - feat: Route Discord mail audit events into a configurable thread.
