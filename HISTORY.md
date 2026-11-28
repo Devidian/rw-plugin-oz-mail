@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.5.0] - 2026-11-28 | OZ Events integration
+
+- Administrative mail reconciliation events are available through OZ Events with per-event controls. Previous Discord audit channel settings are ignored.
+- Requires OZ Tools 0.31.0 or later. OZ Events is optional.
+
 ## [0.4.4] - 2026-11-27 | Attachment custody reads
 
 - Mail now uses one attachment reader for held items when listing and processing messages. It preserves attachment order, custody checks and the existing database transaction.

@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 import de.omegazirkel.risingworld.tools.settings.AdminSettingsEntry;
+import de.omegazirkel.risingworld.tools.settings.EventLogSettings;
 import de.omegazirkel.risingworld.tools.settings.AdminSettingsType;
 import de.omegazirkel.risingworld.tools.settings.JsonSettingsFile;
 import de.omegazirkel.risingworld.tools.settings.SettingsFileEditor;
@@ -21,6 +22,7 @@ import net.risingworld.api.Plugin;
 
 /** Validated server-owned limits. Player-specific limits are stored separately later. */
 public final class MailSettings {
+    public final EventLogSettings eventLogs = new EventLogSettings("mail.discord.audit.send.held", "mail.discord.audit.send.returned");
     public int mailboxLimit;
     public int maxSubjectLength;
     public int maxBodyLength;
@@ -31,8 +33,6 @@ public final class MailSettings {
     public boolean enableAnnouncements;
     public boolean enableCod;
     public boolean enableWelcomeMessage;
-    public long discordAuditChannelId;
-    public String discordAuditThreadTopic;
     public boolean enableExtraMailboxShopOffer;
     public long extraMailboxBasePrice;
     public double extraMailboxPriceIncreaseFactor;
@@ -49,6 +49,7 @@ public final class MailSettings {
     }
 
     private void apply(Properties values, Properties defaults) {
+        eventLogs.load(values::getProperty);
         mailboxLimit = integer(values, defaults, "mailboxLimit", 20, 1, 10000);
         maxSubjectLength = integer(values, defaults, "maxSubjectLength", 50, 1, 500);
         maxBodyLength = integer(values, defaults, "maxBodyLength", 2500, 1, 20000);
@@ -59,9 +60,6 @@ public final class MailSettings {
         enableAnnouncements = bool(values, defaults, "enableAnnouncements", true);
         enableCod = bool(values, defaults, "enableCod", false);
         enableWelcomeMessage = bool(values, defaults, "enableWelcomeMessage", false);
-        discordAuditChannelId = longValue(values, defaults, "discordAuditChannelId", 0L, 0L, Long.MAX_VALUE);
-        discordAuditThreadTopic = values.getProperty("discordAuditThreadTopic",
-                defaults.getProperty("discordAuditThreadTopic", ""));
         enableExtraMailboxShopOffer = bool(values, defaults, "enableExtraMailboxShopOffer", true);
         extraMailboxBasePrice = longValue(values, defaults, "extraMailboxBasePrice", 1000L, 0L, Long.MAX_VALUE);
         extraMailboxPriceIncreaseFactor = decimal(values, defaults, "extraMailboxPriceIncreaseFactor", 1d, 1d, 100d);
@@ -83,7 +81,7 @@ public final class MailSettings {
     }
 
     public synchronized List<AdminSettingsEntry> adminSettingsEntries() {
-        return Arrays.asList(
+        List<AdminSettingsEntry> entries = new java.util.ArrayList<>(Arrays.asList(
                 AdminSettingsEntry.group("mailbox", "Postfach / Mailbox",
                         "Serverseitige Begrenzungen fuer Postfaecher. / Server-owned mailbox limits."),
                 entry("mailboxLimit", "Postfachlimit / Mailbox limit",
@@ -108,11 +106,6 @@ public final class MailSettings {
                         "Nachnahme mit idempotenter Wallet-Zahlung aktivieren. / Enable COD with idempotent Wallet payment.", AdminSettingsType.BOOLEAN),
                 entry("enableWelcomeMessage", "Willkommenshinweis / Welcome notice",
                         "Hinweis beim Betreten senden. / Send a notice when a player joins.", AdminSettingsType.BOOLEAN),
-                AdminSettingsEntry.group("discord", "Discord", "Optionale Auditweiterleitung ohne Mailinhalte; Kanal 0 deaktiviert sie. / Optional audit forwarding without mail contents; channel 0 disables it."),
-                entry("discordAuditChannelId", "Discord-Audit-Kanal / Discord audit channel",
-                        "Discord-Kanal-ID; 0 deaktiviert die Weiterleitung. / Discord channel ID; 0 disables forwarding.", AdminSettingsType.STRING),
-                entry("discordAuditThreadTopic", "Discord-Audit-Thread / Discord audit thread",
-                        "Leer verwendet den Plugin-Namen. / Blank uses the plugin display name.", AdminSettingsType.STRING),
                 AdminSettingsEntry.group("extraMailbox", "Extra-Postfächer / Extra mailboxes",
                         "Shop-Angebot für zusätzliche Postfachkapazität. / Shop offer for additional mailbox capacity."),
                 entry("enableExtraMailboxShopOffer", "Extra-Postfach-Angebot / Extra mailbox offer",
@@ -124,7 +117,9 @@ public final class MailSettings {
                 AdminSettingsEntry.group("bridge", "Plugin-Bridge / Plugin bridge",
                         "Vertrauensgrenze für Plugin-Mails und Anhänge. / Trust boundary for plugin mail and attachments."),
                 entry("trustedPluginSenders", "Vertrauenswürdige Sender / Trusted senders",
-                        "Kommagetrennte Plugin-Namen. / Comma-separated plugin names.", AdminSettingsType.TEXT));
+                        "Kommagetrennte Plugin-Namen. / Comma-separated plugin names.", AdminSettingsType.TEXT)));
+        entries.addAll(eventLogs.entries(settingsFile));
+        return entries;
     }
 
     private AdminSettingsEntry entry(String key, String label, String description, AdminSettingsType type) {

@@ -75,18 +75,11 @@ nicht enthalten.
 Die Queue kann lokal nach Vorgangstyp gefiltert werden. Filter verändern weder
 die Datenbank noch die Inventarverwahrung oder den vollständigen Queue-Export.
 
-## Optional Discord audit / Optionale Discord-Prüfung
+## Optional event audit / Optionale Ereignisprüfung
 
-Set a positive `discordAuditChannelId` only when OZ - Discord Connect is installed;
-channel `0` disables delivery. OZMail forwards successful, verified `SEND`
-resolutions as a localized operational notice. The notice deliberately excludes
-mail contents, player names and the administrator's verification reason.
+Successful, verified `SEND` resolutions are published to OZ Events when installed. The event text excludes mail contents, player names and the administrator's verification reason. The event includes the administrator as its actor. Configure any optional Discord forwarding in OZ Events.
 
-Eine positive `discordAuditChannelId` nur setzen, wenn OZ - Discord Connect
-installiert ist; Kanal `0` deaktiviert die Weiterleitung. OZMail leitet erfolgreiche,
-verifizierte `SEND`-Auflösungen als lokalisierten Betriebshinweis weiter. Der
-Hinweis enthält bewusst keine Mailinhalte, Spielernamen oder den Prüfgrund der
-Administration.
+Erfolgreiche, verifizierte `SEND`-Auflösungen werden an OZ Events gemeldet, sofern es installiert ist. Der Ereignistext enthält keine Mailinhalte, Spielernamen oder den Prüfgrund der Administration. Das Ereignis enthält die Administration als handelnde Person. Eine optionale Discord-Weiterleitung wird in OZ Events konfiguriert.
 
 ## Current limits / Aktuelle Grenzen
 

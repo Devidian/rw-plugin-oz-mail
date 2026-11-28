@@ -371,7 +371,25 @@
   },
   "tc": {
     "setting": {
-      "discordauditthreadtopic": {"label": "Discord-Audit-Thread", "desc": "Leer verwendet den Plugin-Namen. Gleicher Kanal und Thread-Titel nutzen denselben Thread."},
+      "eventlogs": {
+        "label": "Ereignisprotokolle",
+        "desc": "Ereignisse auswählen, die an OZ Events gesendet werden.",
+        "mail": {
+          "discord": {
+            "audit": {
+              "send": {
+                "held": {
+                  "label": "Versand als im Postfach bestätigt"
+                },
+                "returned": {
+                  "label": "Versand als zurückgegeben bestätigt"
+                }
+              }
+            }
+          }
+        }
+      },
+
       "attachmentexpirydays": {
         "desc": "Tage bis zur Rückgabe abgelaufener Anhänge.",
         "label": "Anhang-Ablauf"
@@ -384,14 +402,8 @@
         "desc": "Laufzeitoptionen für Zustellung und Hinweise.",
         "label": "Zustellung"
       },
-      "discordauditchannelid": {
-        "desc": "Discord-Kanal-ID; 0 deaktiviert die Weiterleitung.",
-        "label": "Discord-Audit-Kanal"
-      },
-      "discord": {
-        "desc": "Optionale Auditweiterleitung ohne Mailinhalte.",
-        "label": "Discord"
-      },
+
+
       "enableannouncements": {
         "desc": "Globale Zustellhinweise erlauben.",
         "label": "Ankündigungen"

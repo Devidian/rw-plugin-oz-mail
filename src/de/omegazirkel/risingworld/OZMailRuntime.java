@@ -192,12 +192,13 @@ class OZMailRuntime extends Plugin {
     public boolean resolveQuarantinedSend(Player admin, String correlationId,
             MailDatabase.VerifiedSendOutcome outcome, String reason) {
         boolean resolved = mailService != null && mailService.resolveQuarantinedSend(admin, correlationId, outcome, reason);
-        if (resolved && settings != null && settings.discordAuditChannelId > 0L) {
+        if (resolved) {
             String key = outcome == MailDatabase.VerifiedSendOutcome.HELD_IN_MAIL
                     ? "mail.discord.audit.send.held" : "mail.discord.audit.send.returned";
-            MailDiscordAuditBridge.send(this, settings.discordAuditChannelId,
-                    translations.get(key, admin).replace("PH_MAIL_ID", findMailIdByReference(admin, correlationId)
-                            .orElse(correlationId)), settings.discordAuditThreadTopic);
+            settings.eventLogs.publish(key, () -> de.omegazirkel.risingworld.tools.bridge.AuditEvent.create(admin,
+                    de.omegazirkel.risingworld.tools.bridge.EventMessage.localized(translations, key, java.util.Map.of(
+                            "PH_MAIL_ID", String.valueOf(correlationId))),
+                    key, "oz-mail", "audit"));
         }
         return resolved;
     }

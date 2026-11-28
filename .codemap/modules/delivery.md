@@ -18,3 +18,4 @@ Own message, attachment and operation states in SQLite. Item and COD operations 
 
 - `rw-plugin-oz-wallet/ledger` — Wallet transfers for COD via Tools bridge. [Integration source](../../src/de/omegazirkel/risingworld/mail/MailService.java)
 - `rw-plugin-oz-shop/api` — optional mailbox capacity offer registration. [Integration source](../../src/de/omegazirkel/risingworld/mail/MailboxShopIntegration.java)
+- `rw-plugin-oz-tools/shared-api` — optional mail audit events through EventBridge. [Call site](../../src/de/omegazirkel/risingworld/OZMailRuntime.java)

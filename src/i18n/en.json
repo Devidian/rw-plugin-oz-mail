@@ -371,7 +371,25 @@
   },
   "tc": {
     "setting": {
-      "discordauditthreadtopic": {"label": "Discord audit thread", "desc": "Blank uses the plugin display name. The same channel and thread name reuse one thread."},
+      "eventlogs": {
+        "label": "Event logs",
+        "desc": "Select events sent to OZ Events.",
+        "mail": {
+          "discord": {
+            "audit": {
+              "send": {
+                "held": {
+                  "label": "Send confirmed as held"
+                },
+                "returned": {
+                  "label": "Send confirmed as returned"
+                }
+              }
+            }
+          }
+        }
+      },
+
       "attachmentexpirydays": {
         "desc": "Days before expired attachments are returned.",
         "label": "Attachment expiry"
@@ -384,14 +402,8 @@
         "desc": "Delivery and notification runtime options.",
         "label": "Delivery"
       },
-      "discordauditchannelid": {
-        "desc": "Discord channel ID; 0 disables forwarding.",
-        "label": "Discord audit channel"
-      },
-      "discord": {
-        "desc": "Optional audit forwarding without mail contents.",
-        "label": "Discord"
-      },
+
+
       "enableannouncements": {
         "desc": "Allow global delivery notifications.",
         "label": "Announcements"

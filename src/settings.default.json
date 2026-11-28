@@ -31,8 +31,20 @@
     "cod": false,
     "extraMailboxShopOffer": true
   },
-  "discord": {
-    "auditChannelId": 0,
-    "auditThreadTopic": ""
+  "eventLogs": {
+    "mail": {
+      "discord": {
+        "audit": {
+          "send": {
+            "held": {
+              "enabled": true
+            },
+            "returned": {
+              "enabled": true
+            }
+          }
+        }
+      }
+    }
   }
 }
